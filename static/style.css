@@ -1,0 +1,125 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+    line-height: 1.2;
+}
+
+#header {
+    height: 24px;
+    background-color: #844;
+    color: white;
+    padding-top: 8px;
+    padding-left: 10px;
+    border-bottom: 1px solid #622;
+}
+#controls {
+    margin: 10px 40px 0 40px;
+    background-color: #eee;
+}
+#wrap {
+    margin: 10px 40px 0 40px;
+    font-size: 18px;
+}
+#tagwrap {
+    margin: 10px 40px 0 40px;
+    font-size: 18px;
+}
+
+.rel_title {
+    display: inline-block;
+}
+
+.rel_title a {
+    color: #844;
+}
+
+.rel_paper {
+    margin-bottom: 10px;
+    padding: 10px;
+    background-color: #eee;
+    border-radius: 5px;
+}
+
+.rel_score {
+    display: inline-block;
+    margin-right: 6px;
+    font-weight: bold;
+}
+.rel_authors {
+    font-style: italic;
+    font-size: 16px;
+}
+.rel_time {
+    color: #050;
+    display: inline-block;
+    font-size: 16px;
+}
+.rel_abs {
+    color: #333;
+    font-size: 14px;
+}
+.rel_tags {
+    color: #009;
+    font-size: 16px;
+    display: inline-block;
+    margin-left: 5px;
+}
+.rel_utag {
+    background-color: #009;
+    color: #fff;
+    font-size: 16px;
+    display: inline-block;
+    margin-right: 5px;
+    padding: 0 4px 0 4px;
+    border-radius: 4px;
+}
+.rel_add {
+    position: absolute;
+    width: 26px;
+    height: 26px;
+    background-color: #55f;
+    color: white;
+    left: 7px;
+    cursor: pointer;
+    text-align: center;
+    border-radius: 3px;
+}
+.rel_del {
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    background-color: #f55;
+    color: white;
+    left: 7px;
+    cursor: pointer;
+    text-align: center;
+    border-radius: 3px;
+}
+.rel_utag a {
+    color: white;
+    text-decoration: none;
+}
+.rel more {
+    font-size: 10px;
+}
+#sbox {
+    width: 100%;
+}
+#qfield {
+    width: 100%;
+    box-sizing: border-box;
+
+    height: 40px;
+    font-size: 22px;
+
+    border: solid 1px #999;
+    color: "#333";
+
+    padding-left: 50px;
+
+    background-image: url('/static/search.png');
+    background-repeat: no-repeat;
+    background-position: left center;
+    outline: 0;
+  }

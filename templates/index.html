@@ -1,0 +1,71 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+<!-- meta info -->
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>arxiv-sanity</title>
+<!-- CSS -->
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+<!-- Favicon -->
+<link rel="shortcut icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}" />
+
+<script>
+var papers = {{ papers | tojson }};
+var tags = {{ tags | tojson }};
+var gvars = {{ gvars | tojson }};
+</script>
+
+</head>
+
+<body>
+
+<div id="header">
+    arxiv-sanity
+</div>
+
+<div id="controls">
+    <div>
+        <div id="sbox">
+            <form action="/search" method="get">
+                <input name="q" type="text" id="qfield" value="{{ gvars.search_query }}">
+            </form>
+        </div>
+        <div id="cbox">
+            <!-- 
+                opt_rank = request.args.get('rank', 'tags') # rank type. tags|pid|time|random
+                opt_tags = request.args.get('tags', 'all')  # tags to rank by if opt_rank == 'tag'
+                opt_pid = request.args.get('pid', None)  # pid to find nearest neighbors to
+                opt_time_filter = request.args.get('time_filter', '') # number of days to filter by
+                opt_skip_have = request.args.get('skip_have', 'no') # hide papers we already have? 
+            -->
+            <a href="/?rank=tags&time_filter=7&skip_have=yes">recommend over last week</a><br>
+            <a href="/?rank=tags&time_filter=3&skip_have=yes">recommend over last 3 days</a><br>
+            <a href="/?rank=time">recent</a><br>
+            <a href="/?rank=random&time_filter=7">random last week</a><br>
+        </div>
+    </div>
+    <div>
+        
+    </div>
+    <div id="message">
+        {{gvars.message}}
+    </div>
+</div>
+
+<div id="tagwrap">
+</div>
+
+<div id="wrap">
+</div>
+
+<!-- React -->
+<script src="https://unpkg.com/react@16/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js" crossorigin></script>
+<!-- Babel for displaying JSX -->
+<script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+<!-- Load our React component -->
+<script src="{{ url_for('static', filename='paper_list.js') }}" type="text/babel"></script>
+
+</body>
+</html>
