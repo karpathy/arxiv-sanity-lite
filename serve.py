@@ -254,7 +254,7 @@ def add(pid=None, tag=None):
 @app.route('/del/<tag>')
 def delete_tag(tag=None):
     user = 'root'
-    with get_tags_db() as tags_db:
+    with get_tags_db(flag='c') as tags_db:
 
         if user not in tags_db:
             return "user does not have a library"
