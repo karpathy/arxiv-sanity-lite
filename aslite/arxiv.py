@@ -17,7 +17,7 @@ def get_response(search_query, start_index=0):
     add_url = 'search_query=%s&sortBy=lastUpdatedDate&start=%d&max_results=100' % (search_query, start_index)
     #add_url = 'search_query=%s&sortBy=submittedDate&start=%d&max_results=100' % (search_query, start_index)
     search_query = base_url + add_url
-    logger.info(f"Searching arxiv for {search_query}")
+    logger.debug(f"Searching arxiv for {search_query}")
     with urllib.request.urlopen(search_query) as url:
         response = url.read()
 
