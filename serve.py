@@ -18,7 +18,7 @@ from flask import Flask, request, redirect, url_for
 from flask import render_template
 from flask import g # global session-level object
 
-from aslite.db import SqliteDict, CompressedSqliteDict
+from aslite.db import get_papers_db, get_metas_db, get_tags_db
 
 # -----------------------------------------------------------------------------
 # TODO: user accounts / password login are necessary...
@@ -30,19 +30,19 @@ def get_tags():
     if not hasattr(g, '_tags'):
         user = 'root' # root for now, the only default user
         print("reading tags for user %s" % (user, ))
-        with CompressedSqliteDict('dict.db', tablename='tags', flag='r') as dict_db:
-            tags_dict = dict_db[user] if user in dict_db else {}
+        with get_tags_db() as tags_db:
+            tags_dict = tags_db[user] if user in tags_db else {}
         g._tags = tags_dict
     return g._tags
 
 def get_papers():
     if not hasattr(g, '_pdb'):
-        g._pdb = CompressedSqliteDict('papers.db', tablename='papers', flag='r')
+        g._pdb = get_papers_db()
     return g._pdb
 
 def get_metas():
     if not hasattr(g, '_mdb'):
-        g._mdb = SqliteDict('papers.db', tablename='metas', flag='r')
+        g._mdb = get_metas_db()
     return g._mdb
 
 def render_pids(pids):
@@ -231,14 +231,14 @@ def search():
 @app.route('/add/<pid>/<tag>')
 def add(pid=None, tag=None):
     user = 'root'
-    with CompressedSqliteDict('dict.db', tablename='tags', flag='c') as dict_db:
+    with get_tags_db(flag='c') as tags_db:
 
         # create the user if we don't know about them yet with an empty library
-        if not user in dict_db:
-            dict_db[user] = {}
+        if not user in tags_db:
+            tags_db[user] = {}
 
         # fetch the user library object
-        d = dict_db[user]
+        d = tags_db[user]
 
         # add the paper to the tag
         if tag not in d:
@@ -246,8 +246,7 @@ def add(pid=None, tag=None):
         d[tag].add(pid)
 
         # write back to database
-        dict_db[user] = d
-        dict_db.commit()
+        tags_db[user] = d
 
     print("added paper %s to tag %s for user %s" % (pid, tag, user))
     return "ok: " + str(d) # return back the user library for debugging atm
@@ -255,12 +254,12 @@ def add(pid=None, tag=None):
 @app.route('/del/<tag>')
 def delete_tag(tag=None):
     user = 'root'
-    with CompressedSqliteDict('dict.db', tablename='tags', flag='c') as dict_db:
+    with get_tags_db() as tags_db:
 
-        if user not in dict_db:
+        if user not in tags_db:
             return "user does not have a library"
 
-        d = dict_db[user]
+        d = tags_db[user]
 
         if tag not in d:
             return "user does not have this tag"
@@ -269,8 +268,7 @@ def delete_tag(tag=None):
         del d[tag]
 
         # write back to database
-        dict_db[user] = d
-        dict_db.commit()
+        tags_db[user] = d
 
     print("deleted tag %s for user %s" % (tag, user))
     return "ok: " + str(d) # return back the user library for debugging atm

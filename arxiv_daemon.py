@@ -1,7 +1,7 @@
 """
 This script is intended to wake up every 30 min or so (eg via cron),
 it checks for any new arxiv papers via the arxiv API and stashes
-them into a sqlite database papers.db
+them into a sqlite database.
 """
 
 import sys
@@ -11,7 +11,7 @@ import logging
 import argparse
 
 from aslite.arxiv import get_response, parse_response
-from aslite.db import SqliteDict, CompressedSqliteDict
+from aslite.db import get_papers_db, get_metas_db
 
 if __name__ == '__main__':
 
@@ -25,9 +25,8 @@ if __name__ == '__main__':
     # query string of papers to look for
     q = 'cat:cs.CV+OR+cat:cs.LG+OR+cat:cs.CL+OR+cat:cs.AI+OR+cat:cs.NE+OR+cat:cs.RO'
 
-    # flag='c': default mode, open for read/write, creating the db/table if necessary.
-    pdb = CompressedSqliteDict('papers.db', tablename='papers', flag='c', autocommit=True)
-    mdb = SqliteDict('papers.db', tablename='metas', flag='c', autocommit=True)
+    pdb = get_papers_db(flag='c', autocommit=True)
+    mdb = get_metas_db(flag='c', autocommit=True)
     prevn = len(pdb)
 
     def store(p):

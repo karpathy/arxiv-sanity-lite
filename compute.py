@@ -10,7 +10,7 @@ import argparse
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-from aslite.db import SqliteDict, CompressedSqliteDict
+from aslite.db import get_papers_db
 
 # -----------------------------------------------------------------------------
 
@@ -31,7 +31,7 @@ if __name__ == '__main__':
                         norm='l2', use_idf=True, smooth_idf=True, sublinear_tf=True,
                         max_df=args.max_df, min_df=args.min_df)
 
-    pdb = CompressedSqliteDict('papers.db', tablename='papers', flag='r')
+    pdb = get_papers_db(flag='r')
 
     def make_corpus():
         for p, d in pdb.items():
