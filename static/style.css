@@ -65,7 +65,18 @@ body {
     display: inline-block;
     margin-left: 5px;
 }
-.rel_utag {
+.rel_tag { /* deletes a whole tag */
+    position: absolute;
+    color: white;
+    left: 7px;
+    cursor: pointer;
+    text-align: center;
+    border-radius: 3px;
+    background-color: #f55;
+    width: 22px;
+    height: 22px;
+}
+.rel_utag { /* shows an active tag for a paper */
     background-color: #009;
     color: #fff;
     font-size: 16px;
@@ -73,28 +84,18 @@ body {
     margin-right: 5px;
     padding: 0 4px 0 4px;
     border-radius: 4px;
+    cursor: pointer;
 }
-.rel_add {
-    position: absolute;
-    width: 26px;
-    height: 26px;
+.rel_utag_add { /* adds a paper to a tag */
     background-color: #55f;
-    color: white;
-    left: 7px;
-    cursor: pointer;
+    margin-right: 2px;
+    width: 12px;
     text-align: center;
-    border-radius: 3px;
 }
-.rel_del {
-    position: absolute;
-    width: 22px;
-    height: 22px;
+.rel_utag_sub { /* subs a tag from a paper */
     background-color: #f55;
-    color: white;
-    left: 7px;
-    cursor: pointer;
+    width: 12px;
     text-align: center;
-    border-radius: 3px;
 }
 .rel_utag a {
     color: white;

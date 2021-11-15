@@ -251,6 +251,30 @@ def add(pid=None, tag=None):
     print("added paper %s to tag %s for user %s" % (pid, tag, user))
     return "ok: " + str(d) # return back the user library for debugging atm
 
+@app.route('/sub/<pid>/<tag>')
+def sub(pid=None, tag=None):
+    user = 'root'
+    with get_tags_db(flag='c') as tags_db:
+
+        # if the user doesn't have any tags, there is nothing to do
+        if not user in tags_db:
+            return "user has no library of tags ¯\_(ツ)_/¯"
+
+        # fetch the user library object
+        d = tags_db[user]
+
+        # add the paper to the tag
+        if tag not in d:
+            return "user doesn't have the tag %s" % (tag, )
+        else:
+            d[tag].remove(pid)
+
+        # write back to database
+        tags_db[user] = d
+
+    print("removed from paper %s the tag %s for user %s" % (pid, tag, user))
+    return "ok: " + str(d) # return back the user library for debugging atm
+
 @app.route('/del/<tag>')
 def delete_tag(tag=None):
     user = 'root'
