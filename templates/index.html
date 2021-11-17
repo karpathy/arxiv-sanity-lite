@@ -26,27 +26,60 @@ var gvars = {{ gvars | tojson }};
 
 <div id="controls">
     <div>
+
+        <!-- the search box, allowing us to search by keywords -->
         <div id="sbox">
             <form action="/search" method="get">
                 <input name="q" type="text" id="qfield" value="{{ gvars.search_query }}">
             </form>
         </div>
+
+        <!-- the choice box, allowing us to sort, rank, slice and dice papers -->
         <div id="cbox">
-            <!-- 
-                opt_rank = request.args.get('rank', 'tags') # rank type. tags|pid|time|random
-                opt_tags = request.args.get('tags', 'all')  # tags to rank by if opt_rank == 'tag'
-                opt_pid = request.args.get('pid', None)  # pid to find nearest neighbors to
-                opt_time_filter = request.args.get('time_filter', '') # number of days to filter by
-                opt_skip_have = request.args.get('skip_have', 'no') # hide papers we already have? 
-            -->
-            <a href="/?rank=tags&time_filter=7&skip_have=yes">recommend over last week</a><br>
-            <a href="/?rank=tags&time_filter=3&skip_have=yes">recommend over last 3 days</a><br>
-            <a href="/?rank=time">recent</a><br>
-            <a href="/?rank=random&time_filter=7">random last week</a><br>
+            <form action="/" method="get">
+
+                <!-- rank type: one of tags, pid, time, or random -->
+                <label for="rank_type">Rank by:</label>
+                <select name="rank" id="rank_select">
+                    <option value="tags" {{ gvars.rank == 'tags' and 'selected' }}>tags</option>
+                    <option value="pid" {{ gvars.rank == 'pid' and 'selected' }}>pid</option>
+                    <option value="time" {{ gvars.rank == 'time' and 'selected' }}>time</option>
+                    <option value="random" {{ gvars.rank == 'random' and 'selected' }}>random</option>
+                </select>
+
+                <!-- current tags, simply in a text field -->
+                <label for="tags">tags: </label>
+                <input name="tags" type="text" id="tags_field" value="{{ gvars.tags }}">
+
+                <!-- current pid, simply in a text field -->
+                <label for="pid">pid: </label>
+                <input name="pid" type="text" id="pid_field" value="{{ gvars.pid }}">
+
+                <!-- current time_filter, in a text field -->
+                <label for="time_filter">time_filter: </label>
+                <input name="time_filter" type="text" id="time_filter_field" value="{{ gvars.time_filter }}">
+
+                <!-- current skip_have: one of yes or no -->
+                <label for="skip_have">skip_have: </label>
+                <select name="skip_have" id="skip_have_select">
+                    <option value="yes" {{ gvars.skip_have == 'yes' and 'selected' }}>yes</option>
+                    <option value="no" {{ gvars.skip_have == 'no' and 'selected' }}>no</option>
+                </select>
+
+                <input type="submit" value="Submit">
+            </form>
+        </div>
+        <!-- some hand-coded common choices for faster and more convenient operation -->
+        <div id="cbox_fast">
+            Shortcuts:
+            <a href="/?rank=tags&tags=all&time_filter=7&skip_have=yes">recommend over last week</a>
+            <a href="/?rank=tags&tags=all&time_filter=3&skip_have=yes">recommend over last 3 days</a>
+            <a href="/?rank=time">recent</a>
+            <a href="/?rank=random&time_filter=7">random last week</a>
         </div>
     </div>
     <div>
-        
+
     </div>
     <div id="message">
         {{gvars.message}}

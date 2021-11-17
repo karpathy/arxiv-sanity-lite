@@ -19,7 +19,7 @@ const Paper = props => {
     const subber = () => fetch("/sub/" + p.id + "/" + prompt("tag to subtract from this paper:"))
                         .then(response => console.log(response.text()));
     const utags = p.utags.map((utxt, ix) => <UTag key={ix} tag={utxt} />);
-    const similar_url = "/?rank=tags&pid=" + p.id;
+    const similar_url = "/?rank=pid&pid=" + p.id;
     return (
     <div class='rel_paper'>
         <div class="rel_score">{p.weight.toFixed(2)}</div>

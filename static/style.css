@@ -124,3 +124,15 @@ body {
     background-position: left center;
     outline: 0;
   }
+#cbox {
+    margin-top: 5px;
+    font-size: 14px;
+}
+#cbox_fast {
+    font-size: 14px;
+}
+#cbox_fast a {
+    display: inline-block;
+    background-color: #eee;
+    padding: 3px;
+}

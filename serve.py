@@ -82,11 +82,11 @@ def time_rank():
     scores = [(tnow - v['_time'])/60/60/24 for k, v in ms] # time delta in days
     return pids, scores
 
-def svm_rank(tags=None, pid=None):
+def svm_rank(tags: str = '', pid: str = ''):
 
     # tag can be one tag or a few comma-separated tags or 'all' for all tags we have in db
     # pid can be a specific paper id to set as positive for a kind of nearest neighbor search
-    assert (tags is not None) or (pid is not None)
+    assert tags or pid
 
     # load all of the features
     features = pickle.load(open('features.p', 'rb'))
@@ -99,9 +99,9 @@ def svm_rank(tags=None, pid=None):
 
     # construct the positive set
     y = np.zeros(n, dtype=np.float32)
-    if pid is not None:
+    if pid:
         y[ptoi[pid]] = 1.0
-    elif tags is not None:
+    elif tags:
         tags_db = get_tags()
         tags_filter_to = tags_db.keys() if tags == 'all' else set(tags.split(','))
         for tag, pids in tags_db.items():
@@ -133,7 +133,7 @@ def default_context(papers, **kwargs):
     gvars = {}
     gvars['search_query'] = ''
     gvars['time_filter'] = ''
-    gvars['message'] = 'default_message'
+    gvars['message'] = ''
     context['gvars'] = gvars
     return context
 
@@ -154,14 +154,16 @@ def main():
 
     # GET options
     opt_rank = request.args.get('rank', 'time') # rank type. tags|pid|time|random
-    opt_tags = request.args.get('tags', 'all')  # tags to rank by if opt_rank == 'tag'
-    opt_pid = request.args.get('pid', None)  # pid to find nearest neighbors to
+    opt_tags = request.args.get('tags', '')  # tags to rank by if opt_rank == 'tag'
+    opt_pid = request.args.get('pid', '')  # pid to find nearest neighbors to
     opt_time_filter = request.args.get('time_filter', '') # number of days to filter by
     opt_skip_have = request.args.get('skip_have', 'no') # hide papers we already have?
 
     # rank papers: by tags, by time, by random
-    if opt_rank in ['tags', 'pid']:
-        pids, scores = svm_rank(tags=opt_tags, pid=opt_pid)
+    if opt_rank == 'tags':
+        pids, scores = svm_rank(tags=opt_tags)
+    elif opt_rank == 'pid':
+        pids, scores = svm_rank(pid=opt_pid)
     elif opt_rank == 'time':
         pids, scores = time_rank()
     elif opt_rank == 'random':
@@ -193,7 +195,9 @@ def main():
     context = default_context(papers)
     context['gvars']['rank'] = opt_rank
     context['gvars']['tags'] = opt_tags
+    context['gvars']['pid'] = opt_pid
     context['gvars']['time_filter'] = opt_time_filter
+    context['gvars']['skip_have'] = opt_skip_have
     return render_template('index.html', **context)
 
 
