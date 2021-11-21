@@ -17,9 +17,9 @@ from aslite.db import get_papers_db
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='Arxiv Computor')
-    parser.add_argument('-n', '--num', type=int, default=10000, help='number of tfidf features')
+    parser.add_argument('-n', '--num', type=int, default=20000, help='number of tfidf features')
     parser.add_argument('--min_df', type=int, default=5, help='min df')
-    parser.add_argument('--max_df', type=float, default=0.5, help='max df')
+    parser.add_argument('--max_df', type=float, default=0.1, help='max df')
     args = parser.parse_args()
     print(args)
 
