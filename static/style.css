@@ -136,3 +136,7 @@ body {
     background-color: #eee;
     padding: 3px;
 }
+#header a{
+    color: white;
+    text-decoration: none;
+}
