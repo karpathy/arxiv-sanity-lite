@@ -25,7 +25,10 @@ body {
     margin: 10px 40px 0 40px;
     font-size: 18px;
 }
-
+#wordwrap {
+    margin: 10px 40px 0 40px;
+    font-size: 14px;
+}
 .rel_title {
     display: inline-block;
 }
@@ -139,4 +142,36 @@ body {
 #header a{
     color: white;
     text-decoration: none;
+}
+.rel_more {
+    font-size: 14px;
+    display: inline-block;
+    margin-right: 10px;
+}
+.rel_inspect {
+    font-size: 14px;
+    display: inline-block;
+    margin-right: 10px;
+}
+#wordList {
+    margin-top: 5px;
+    margin-bottom: 10px;
+}
+.rel_word {
+    display: inline-block;
+    background-color: #eef;
+    padding: 2px;
+    margin: 2px;
+}
+.rel_word_weight {
+    display: inline-block;
+    color: #009;
+}
+.rel_word_idf {
+    display: inline-block;
+    margin-left: 5px;
+}
+.rel_word_txt {
+    display: inline-block;
+    margin-left: 5px;
 }

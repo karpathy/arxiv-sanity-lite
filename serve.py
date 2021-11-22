@@ -89,7 +89,8 @@ def svm_rank(tags: str = '', pid: str = ''):
     assert tags or pid
 
     # load all of the features
-    features = pickle.load(open('features.p', 'rb'))
+    with open('features.p', 'rb') as f:
+        features = pickle.load(f)
     x, pids = features['x'], features['pids']
     n, d = x.shape
     ptoi, itop = {}, {}
@@ -231,6 +232,39 @@ def search():
     context['gvars']['search_query'] = q
     return render_template('index.html', **context)
 
+@app.route('/inspect', methods=['GET'])
+def inspect():
+
+    # fetch the paper of interest based on the pid
+    pid = request.args.get('pid', '')
+    pdb = get_papers()
+    if pid not in pdb:
+        return "error, malformed pid" # todo: better error handling
+
+    # load the tfidf vectors, the vocab, and the idf table
+    with open('features.p', 'rb') as f:
+        features = pickle.load(f)
+    x = features['x']
+    idf = features['idf']
+    ivocab = {v:k for k,v in features['vocab'].items()}
+    pix = features['pids'].index(pid)
+    wixs = np.flatnonzero(np.asarray(x[pix].todense()))
+    words = []
+    for ix in wixs:
+        words.append({
+            'word': ivocab[ix],
+            'weight': float(x[pix, ix]),
+            'idf': float(idf[ix]),
+        })
+    words.sort(key=lambda w: w['weight'], reverse=True)
+
+    # package everything up and render
+    paper = render_pids([pid])[0]
+    context = dict(
+        paper = paper,
+        words = words,
+    )
+    return render_template('inspect.html', **context)
 
 @app.route('/add/<pid>/<tag>')
 def add(pid=None, tag=None):

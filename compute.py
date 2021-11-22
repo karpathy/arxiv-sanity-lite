@@ -49,5 +49,7 @@ if __name__ == '__main__':
     features = {
         'pids': list(pdb.keys()),
         'x': x,
+        'vocab': v.vocabulary_,
+        'idf': v._tfidf.idf_,
     }
     pickle.dump(features, open('features.p', 'wb' ))

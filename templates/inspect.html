@@ -1,0 +1,41 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+<!-- meta info -->
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>arxiv-sanity</title>
+<!-- CSS -->
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+<!-- Favicon -->
+<link rel="shortcut icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}" />
+
+<script>
+var paper = {{ paper | tojson }};
+var words = {{ words | tojson }};
+</script>
+
+</head>
+
+<body>
+
+<div id="header">
+    <a href="/">arxiv-sanity</a>
+</div>
+
+<div id="wrap">
+</div>
+
+<div id="wordwrap">
+</div>
+
+<!-- React -->
+<script src="https://unpkg.com/react@16/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js" crossorigin></script>
+<!-- Babel for displaying JSX -->
+<script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+<!-- Load our React component -->
+<script src="{{ url_for('static', filename='paper_detail.js') }}" type="text/babel"></script>
+
+</body>
+</html>

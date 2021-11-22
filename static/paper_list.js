@@ -20,6 +20,8 @@ const Paper = props => {
                         .then(response => console.log(response.text()));
     const utags = p.utags.map((utxt, ix) => <UTag key={ix} tag={utxt} />);
     const similar_url = "/?rank=pid&pid=" + p.id;
+    const inspect_url = "/inspect?pid=" + p.id;
+
     return (
     <div class='rel_paper'>
         <div class="rel_score">{p.weight.toFixed(2)}</div>
@@ -34,6 +36,7 @@ const Paper = props => {
         </div>
         <div class='rel_abs'>{p.summary}</div>
         <div class='rel_more'><a href={similar_url}>similar</a></div>
+        <div class='rel_inspect'><a href={inspect_url}>inspect</a></div>
     </div>
     )
 }
@@ -77,15 +80,5 @@ const TagList = props => {
     )
 }
 
-const Opts = props => {
-    const g = props.gvars;
-    return (
-        <div>
-             time filter (days): <input type="text" value={g.time_filter} />
-        </div>
-    )
-}
-
 ReactDOM.render(<PaperList papers={papers} />, document.getElementById('wrap'))
 ReactDOM.render(<TagList tags={tags} />, document.getElementById('tagwrap'))
-//ReactDOM.render(<Opts gvars={gvars} />, document.getElementById('cbox'))
