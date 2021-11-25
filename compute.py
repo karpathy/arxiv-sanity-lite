@@ -1,7 +1,5 @@
 """
-Extracts features from all paper abstracts.
-Saves them into one big features.p pickle file holding the numpy array
-of features for all the paper abstracts...
+Extracts tfidf features from all paper abstracts and saves them to disk.
 """
 
 import pickle
@@ -10,7 +8,7 @@ import argparse
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-from aslite.db import get_papers_db
+from aslite.db import get_papers_db, save_features
 
 # -----------------------------------------------------------------------------
 
@@ -45,11 +43,11 @@ if __name__ == '__main__':
     x = v.transform(make_corpus()).astype(np.float32)
     print(x.shape)
 
-    print("saving to features.p")
+    print("saving to features to disk...")
     features = {
         'pids': list(pdb.keys()),
         'x': x,
         'vocab': v.vocabulary_,
         'idf': v._tfidf.idf_,
     }
-    pickle.dump(features, open('features.p', 'wb' ))
+    save_features(features)

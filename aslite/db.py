@@ -1,5 +1,7 @@
 """
-Database support functions
+Database support functions.
+The idea is that none of the individual scripts deal directly with the file system.
+Any of the file system I/O and the associated settings are in this single file.
 """
 
 import sqlite3, zlib, pickle
@@ -21,7 +23,6 @@ class CompressedSqliteDict(SqliteDict):
         super().__init__(*args, **kwargs, encode=encode, decode=decode)
 
 # -----------------------------------------------------------------------------
-
 """
 some docs to self:
 flag='c': default mode, open for read/write, and creating the db/table if necessary
@@ -45,3 +46,21 @@ def get_tags_db(flag='r', autocommit=True):
     assert flag in ['r', 'c']
     ddb = CompressedSqliteDict(DICT_DB_FILE, tablename='tags', flag=flag, autocommit=autocommit)
     return ddb
+
+# -----------------------------------------------------------------------------
+"""
+our "feature store" is currently just a pickle file, may want to consider hdf5 in the future
+"""
+
+FEATURES_FILE = 'features.p' # stores tfidf features a bunch of other metadata
+
+def save_features(features):
+    """ takes the features dict and save it to disk in a simple pickle file """
+    with open(FEATURES_FILE, 'wb') as f:
+        pickle.dump(features, f)
+
+def load_features():
+    """ loads the features dict from disk """
+    with open(FEATURES_FILE, 'rb') as f:
+        features = pickle.load(f)
+    return features

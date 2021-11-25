@@ -19,6 +19,7 @@ from flask import render_template
 from flask import g # global session-level object
 
 from aslite.db import get_papers_db, get_metas_db, get_tags_db
+from aslite.db import load_features
 
 # -----------------------------------------------------------------------------
 # TODO: user accounts / password login are necessary...
@@ -89,8 +90,7 @@ def svm_rank(tags: str = '', pid: str = ''):
     assert tags or pid
 
     # load all of the features
-    with open('features.p', 'rb') as f:
-        features = pickle.load(f)
+    features = load_features()
     x, pids = features['x'], features['pids']
     n, d = x.shape
     ptoi, itop = {}, {}
@@ -242,8 +242,7 @@ def inspect():
         return "error, malformed pid" # todo: better error handling
 
     # load the tfidf vectors, the vocab, and the idf table
-    with open('features.p', 'rb') as f:
-        features = pickle.load(f)
+    features = load_features()
     x = features['x']
     idf = features['idf']
     ivocab = {v:k for k,v in features['vocab'].items()}
