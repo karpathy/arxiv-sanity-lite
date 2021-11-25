@@ -4,8 +4,11 @@ The idea is that none of the individual scripts deal directly with the file syst
 Any of the file system I/O and the associated settings are in this single file.
 """
 
+import os
 import sqlite3, zlib, pickle
 from sqlitedict import SqliteDict
+
+DATA_DIR = 'data'
 
 # -----------------------------------------------------------------------------
 
@@ -29,8 +32,10 @@ flag='c': default mode, open for read/write, and creating the db/table if necess
 flag='r': open for read-only
 """
 
-PAPERS_DB_FILE = 'papers.db' # stores info about papers, and also their lighter-weight metadata
-DICT_DB_FILE = 'dict.db' # stores account-relevant info, like which tags exist for which papers
+# stores info about papers, and also their lighter-weight metadata
+PAPERS_DB_FILE = os.path.join(DATA_DIR, 'papers.db')
+# stores account-relevant info, like which tags exist for which papers
+DICT_DB_FILE = os.path.join(DATA_DIR, 'dict.db')
 
 def get_papers_db(flag='r', autocommit=True):
     assert flag in ['r', 'c']
@@ -52,7 +57,8 @@ def get_tags_db(flag='r', autocommit=True):
 our "feature store" is currently just a pickle file, may want to consider hdf5 in the future
 """
 
-FEATURES_FILE = 'features.p' # stores tfidf features a bunch of other metadata
+# stores tfidf features a bunch of other metadata
+FEATURES_FILE = os.path.join(DATA_DIR, 'features.p')
 
 def save_features(features):
     """ takes the features dict and save it to disk in a simple pickle file """
