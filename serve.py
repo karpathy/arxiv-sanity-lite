@@ -76,8 +76,8 @@ def render_pid(pid):
     )
 
 def random_rank():
-    pdb = get_papers()
-    pids = list(pdb.keys())
+    mdb = get_metas()
+    pids = list(mdb.keys())
     shuffle(pids)
     scores = [0 for _ in pids]
     return pids, scores
@@ -186,16 +186,16 @@ def main():
 
     # filter by time
     if opt_time_filter:
-        pdb = get_papers()
+        mdb = get_metas()
         tnow = time.time()
         deltat = int(opt_time_filter)*60*60*24 # allowed time delta in seconds
-        keep = [i for i,pid in enumerate(pids) if (tnow - pdb[pid]['_time']) < deltat]
+        keep = [i for i,pid in enumerate(pids) if (tnow - mdb[pid]['_time']) < deltat]
         pids, scores = [pids[i] for i in keep], [scores[i] for i in keep]
 
     # optionally hide papers we already have
     if opt_skip_have == 'yes':
-        tags_db = get_tags()
-        have = set().union(*tags_db.values())
+        tags = get_tags()
+        have = set().union(*tags.values())
         keep = [i for i,pid in enumerate(pids) if pid not in have]
         pids, scores = [pids[i] for i in keep], [scores[i] for i in keep]
 
