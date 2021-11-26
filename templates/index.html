@@ -12,20 +12,17 @@ var gvars = {{ gvars | tojson }};
 <div id="controls">
     <div>
 
-        <!-- the search box, allowing us to search by keywords -->
-        <div id="sbox">
-            <form action="/search" method="get">
-                <input name="q" type="text" id="qfield" value="{{ gvars.search_query }}">
-            </form>
-        </div>
-
         <!-- the choice box, allowing us to sort, rank, slice and dice papers -->
         <div id="cbox">
             <form action="/" method="get">
 
+                <!-- the search box, allowing us to search by keywords -->
+                <input name="q" type="text" id="qfield" value="{{ gvars.search_query }}">
+
                 <!-- rank type: one of tags, pid, time, or random -->
                 <label for="rank_type">Rank by:</label>
                 <select name="rank" id="rank_select">
+                    <option value="search" {{ gvars.rank == 'search' and 'selected' }}>search</option>
                     <option value="tags" {{ gvars.rank == 'tags' and 'selected' }}>tags</option>
                     <option value="pid" {{ gvars.rank == 'pid' and 'selected' }}>pid</option>
                     <option value="time" {{ gvars.rank == 'time' and 'selected' }}>time</option>

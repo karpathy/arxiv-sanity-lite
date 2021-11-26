@@ -136,21 +136,50 @@ def svm_rank(tags: str = '', pid: str = ''):
 
     return pids, scores
 
+def search_rank(q: str = ''):
+    if not q:
+        return [], [] # no query? no results
+    qs = q.lower().strip().split() # split query by spaces and lowercase
+
+    pdb = get_papers()
+    match = lambda s: sum(s.lower().count(qp) for qp in qs)
+    pairs = []
+    for pid, p in pdb.items():
+        score = 0.0
+        score += 5.0 * match(' '.join([a['name'] for a in p['authors']]))
+        score += 10.0 * match(p['title'])
+        score += 1.0 * match(p['summary'])
+        if score > 0:
+            pairs.append((score, pid))
+
+    pairs.sort(reverse=True)
+    pids = [p[1] for p in pairs]
+    scores = [p[0] for p in pairs]
+    return pids, scores
+
 # -----------------------------------------------------------------------------
 # primary application endpoints
 
 @app.route('/', methods=['GET'])
 def main():
 
-    # GET options
-    opt_rank = request.args.get('rank', 'time') # rank type. tags|pid|time|random
+    # GET options and their defaults
+    opt_rank = request.args.get('rank', 'time') # rank type. search|tags|pid|time|random
+    opt_q = request.args.get('q', '') # search request in the text box
     opt_tags = request.args.get('tags', '')  # tags to rank by if opt_rank == 'tag'
     opt_pid = request.args.get('pid', '')  # pid to find nearest neighbors to
     opt_time_filter = request.args.get('time_filter', '') # number of days to filter by
     opt_skip_have = request.args.get('skip_have', 'no') # hide papers we already have?
 
+    # if a query is given, override rank to be of type "search"
+    # this allows the user to simply hit ENTER in the search field and have the correct thing happen
+    if opt_q:
+        opt_rank = 'search'
+
     # rank papers: by tags, by time, by random
-    if opt_rank == 'tags':
+    if opt_rank == 'search':
+        pids, scores = search_rank(q=opt_q)
+    elif opt_rank == 'tags':
         pids, scores = svm_rank(tags=opt_tags)
     elif opt_rank == 'pid':
         pids, scores = svm_rank(pid=opt_pid)
@@ -176,8 +205,10 @@ def main():
         keep = [i for i,pid in enumerate(pids) if pid not in have]
         pids, scores = [pids[i] for i in keep], [scores[i] for i in keep]
 
-    # crop
+    # crop the results
     pids = pids[:min(len(pids), RET_NUM)]
+
+    # render all papers to just the information we need for the UI
     papers = render_pids(pids)
     for i, p  in enumerate(papers):
         p['weight'] = float(scores[i])
@@ -193,46 +224,7 @@ def main():
     context['gvars']['pid'] = opt_pid
     context['gvars']['time_filter'] = opt_time_filter
     context['gvars']['skip_have'] = opt_skip_have
-    context['gvars']['search_query'] = ''
-    return render_template('index.html', **context)
-
-@app.route("/search", methods=['GET'])
-def search():
-    q = request.args.get('q', '') # get the search request
-    if not q:
-        return redirect(url_for('main')) # if someone just hits enter with empty field
-    qs = q.lower().strip().split() # split by spaces
-
-    match = lambda s: sum(s.lower().count(qp) for qp in qs)
-    pairs = []
-    pdb = get_papers()
-    for pid, p in pdb.items():
-        score = 0.0
-        score += 5.0 * match(' '.join([a['name'] for a in p['authors']]))
-        score += 10.0 * match(p['title'])
-        score += 1.0 * match(p['summary'])
-        if score > 0:
-            pairs.append((score, pid))
-
-    pairs.sort(reverse=True)
-    pids = [p[1] for p in pairs]
-    pids = pids[:min(RET_NUM, len(pids))] # crop if needed
-
-    papers = render_pids(pids)
-    for i, p in enumerate(papers):
-        p['weight'] = pairs[i][0]
-
-    tags = get_tags()
-    context = {}
-    context['papers'] = papers
-    context['tags'] = [{'name':t, 'n':len(pids)} for t, pids in tags.items()] + [{'name': 'all'}]
-    context['gvars'] = {}
-    context['gvars']['rank'] = ''
-    context['gvars']['tags'] = ''
-    context['gvars']['pid'] = ''
-    context['gvars']['time_filter'] = ''
-    context['gvars']['skip_have'] = ''
-    context['gvars']['search_query'] = q
+    context['gvars']['search_query'] = opt_q
     return render_template('index.html', **context)
 
 @app.route('/inspect', methods=['GET'])
