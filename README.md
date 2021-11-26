@@ -16,6 +16,11 @@ I hope to make this good over time and once it's ready to also host it publicly,
 - Then run compute.py to re-calculate tfidf features on the paper abstracts and save those to database.
 - Finally run serve.py to start the server and access the frontend layer over the data, e.g.: `export FLASK_APP=serve.py; flask run`.
 
+#### todos
+
+- add user accounts so we can shipit
+- the metas table should not be a sqlitedict but a proper sqlite table, for efficiency
+- build a reverse index to support faster search, right now we iterate through the entire database
 
 #### License
 
