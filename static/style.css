@@ -175,3 +175,9 @@ body {
     display: inline-block;
     margin-left: 5px;
 }
+#login-link {
+    /* position on the right of the header */
+    position: absolute;
+    right: 10px;
+    top: 10px;
+}

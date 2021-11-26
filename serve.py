@@ -31,10 +31,11 @@ RET_NUM = 100 # number of papers to return per page
 # globals that manage the (lazy) loading of various state for a request
 
 def get_tags():
+    if g.user is None:
+        return {}
     if not hasattr(g, '_tags'):
-        user = 'root' # root for now, the only default user
         with get_tags_db() as tags_db:
-            tags_dict = tags_db[user] if user in tags_db else {}
+            tags_dict = tags_db[g.user] if g.user in tags_db else {}
         g._tags = tags_dict
     return g._tags
 
@@ -47,6 +48,11 @@ def get_metas():
     if not hasattr(g, '_mdb'):
         g._mdb = get_metas_db()
     return g._mdb
+
+@app.before_request
+def before_request():
+  g.user = 'root' # current default user, as we have no accounts db at this time just yet
+  #g.user = None # if noone is logged in, will be the default state shortly
 
 @app.teardown_request
 def close_connection(error=None):
@@ -154,6 +160,12 @@ def search_rank(q: str = ''):
 # -----------------------------------------------------------------------------
 # primary application endpoints
 
+def default_context():
+    # any global context across all pages, e.g. related to the current user
+    context = {}
+    context['user'] = g.user if g.user is not None else ''
+    return context
+
 @app.route('/', methods=['GET'])
 def main():
 
@@ -208,11 +220,16 @@ def main():
     for i, p  in enumerate(papers):
         p['weight'] = float(scores[i])
 
-    # build the page context information and render
+    # build the current tags for the user, and append the special 'all' tag
     tags = get_tags()
-    context = {}
+    rtags = [{'name':t, 'n':len(pids)} for t, pids in tags.items()]
+    if rtags:
+        rtags.append({'name': 'all'})
+
+    # build the page context information and render
+    context = default_context()
     context['papers'] = papers
-    context['tags'] = [{'name':t, 'n':len(pids)} for t, pids in tags.items()] + [{'name': 'all'}]
+    context['tags'] = rtags
     context['gvars'] = {}
     context['gvars']['rank'] = opt_rank
     context['gvars']['tags'] = opt_tags
@@ -249,26 +266,34 @@ def inspect():
 
     # package everything up and render
     paper = render_pid(pid)
-    context = dict(
-        paper = paper,
-        words = words,
-    )
+    context = default_context()
+    context['paper'] = paper
+    context['words'] = words
     return render_template('inspect.html', **context)
+
+@app.route('/profile')
+def profile():
+    context = default_context()
+    return render_template('profile.html', **context)
 
 # -----------------------------------------------------------------------------
 # tag related endpoints: add, delete tags for any paper
 
 @app.route('/add/<pid>/<tag>')
 def add(pid=None, tag=None):
-    user = 'root'
+    if g.user is None:
+        return "error, not logged in"
+    if tag == 'all':
+        return "error, cannot add the protected tag 'all'"
+
     with get_tags_db(flag='c') as tags_db:
 
         # create the user if we don't know about them yet with an empty library
-        if not user in tags_db:
-            tags_db[user] = {}
+        if not g.user in tags_db:
+            tags_db[g.user] = {}
 
         # fetch the user library object
-        d = tags_db[user]
+        d = tags_db[g.user]
 
         # add the paper to the tag
         if tag not in d:
@@ -276,22 +301,24 @@ def add(pid=None, tag=None):
         d[tag].add(pid)
 
         # write back to database
-        tags_db[user] = d
+        tags_db[g.user] = d
 
-    print("added paper %s to tag %s for user %s" % (pid, tag, user))
+    print("added paper %s to tag %s for user %s" % (pid, tag, g.user))
     return "ok: " + str(d) # return back the user library for debugging atm
 
 @app.route('/sub/<pid>/<tag>')
 def sub(pid=None, tag=None):
-    user = 'root'
+    if g.user is None:
+        return "error, not logged in"
+
     with get_tags_db(flag='c') as tags_db:
 
         # if the user doesn't have any tags, there is nothing to do
-        if not user in tags_db:
+        if not g.user in tags_db:
             return "user has no library of tags ¯\_(ツ)_/¯"
 
         # fetch the user library object
-        d = tags_db[user]
+        d = tags_db[g.user]
 
         # add the paper to the tag
         if tag not in d:
@@ -300,20 +327,22 @@ def sub(pid=None, tag=None):
             d[tag].remove(pid)
 
         # write back to database
-        tags_db[user] = d
+        tags_db[g.user] = d
 
-    print("removed from paper %s the tag %s for user %s" % (pid, tag, user))
+    print("removed from paper %s the tag %s for user %s" % (pid, tag, g.user))
     return "ok: " + str(d) # return back the user library for debugging atm
 
 @app.route('/del/<tag>')
 def delete_tag(tag=None):
-    user = 'root'
+    if g.user is None:
+        return "error, not logged in"
+
     with get_tags_db(flag='c') as tags_db:
 
-        if user not in tags_db:
+        if g.user not in tags_db:
             return "user does not have a library"
 
-        d = tags_db[user]
+        d = tags_db[g.user]
 
         if tag not in d:
             return "user does not have this tag"
@@ -322,7 +351,7 @@ def delete_tag(tag=None):
         del d[tag]
 
         # write back to database
-        tags_db[user] = d
+        tags_db[g.user] = d
 
-    print("deleted tag %s for user %s" % (tag, user))
+    print("deleted tag %s for user %s" % (tag, g.user))
     return "ok: " + str(d) # return back the user library for debugging atm

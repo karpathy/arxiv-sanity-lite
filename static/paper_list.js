@@ -80,5 +80,11 @@ const TagList = props => {
     )
 }
 
-ReactDOM.render(<PaperList papers={papers} />, document.getElementById('wrap'))
-ReactDOM.render(<TagList tags={tags} />, document.getElementById('tagwrap'))
+// render papers into #wrap
+ReactDOM.render(<PaperList papers={papers} />, document.getElementById('wrap'));
+
+// render tags into #tagwrap, if it exists
+let tagwrap_elt = document.getElementById('tagwrap');
+if (tagwrap_elt) {
+    ReactDOM.render(<TagList tags={tags} />, tagwrap_elt);
+}
