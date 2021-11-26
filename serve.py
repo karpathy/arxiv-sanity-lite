@@ -59,27 +59,21 @@ def close_connection(error=None):
 # -----------------------------------------------------------------------------
 # ranking utilities for completing the search/rank/filter requests
 
-def render_pids(pids):
-
+def render_pid(pid):
+    # render a single paper with just the information we need for the UI
     pdb = get_papers()
     tags = get_tags()
-
-    papers = []
-    for pid in pids:
-        d = pdb[pid]
-        ptags = [t for t, pids in tags.items() if pid in pids]
-        papers.append({
-            'weight': 0.0,
-            'id': d['_id'],
-            'title': d['title'],
-            'time': d['_time_str'],
-            'authors': ', '.join(a['name'] for a in d['authors']),
-            'tags': ', '.join(t['term'] for t in d['tags']),
-            'utags': ptags,
-            'summary': d['summary'],
-        })
-
-    return papers
+    d = pdb[pid]
+    return dict(
+        weight = 0.0,
+        id = d['_id'],
+        title = d['title'],
+        time = d['_time_str'],
+        authors = ', '.join(a['name'] for a in d['authors']),
+        tags = ', '.join(t['term'] for t in d['tags']),
+        utags = [t for t, pids in tags.items() if pid in pids],
+        summary = d['summary'],
+    )
 
 def random_rank():
     pdb = get_papers()
@@ -209,7 +203,7 @@ def main():
     pids = pids[:min(len(pids), RET_NUM)]
 
     # render all papers to just the information we need for the UI
-    papers = render_pids(pids)
+    papers = [render_pid(pid) for pid in pids]
     for i, p  in enumerate(papers):
         p['weight'] = float(scores[i])
 
@@ -253,7 +247,7 @@ def inspect():
     words.sort(key=lambda w: w['weight'], reverse=True)
 
     # package everything up and render
-    paper = render_pids([pid])[0]
+    paper = render_pid(pid)
     context = dict(
         paper = paper,
         words = words,
