@@ -227,3 +227,10 @@ body {
     border-radius: 4px;
     cursor: pointer;
 }
+#log-fun-warn {
+    text-align: center;
+    background-color: #ffd;
+    color: #777;
+    font-size: 14px;
+    padding: 3px;
+}

@@ -9,6 +9,11 @@ var gvars = {{ gvars | tojson }};
 {% endblock %}
 
 {% block content %}
+
+{% if not user %}
+<div id="log-fun-warn">(hi! just btw you have to be logged in to be able to add/delete/curate tags for papers)</div>
+{% endif %}
+
 <div id="controls">
     <div>
 
