@@ -41,6 +41,7 @@ if __name__ == '__main__':
         mdb[p['_id']] = {'_time': p['_time']}
 
     # fetch the latest papers
+    total_updated = 0
     zero_updates_in_a_row = 0
     for k in range(args.start, args.start + args.num, 100):
         logging.info('querying arxiv api for query %s at start_index %d' % (q, k))
@@ -80,6 +81,7 @@ if __name__ == '__main__':
                 store(p)
                 nnew += 1
         prevn = len(pdb)
+        total_updated += nreplace + nnew
 
         # some diagnostic information on how things are coming along
         logging.info(papers[0]['_time_str'])
@@ -100,3 +102,6 @@ if __name__ == '__main__':
 
         # zzz
         time.sleep(1 + random.uniform(0, 3))
+
+    # exit with OK status if anything at all changed, but if nothing happened then raise 1
+    sys.exit(0 if total_updated > 0 else 1)
