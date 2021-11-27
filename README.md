@@ -4,23 +4,42 @@
 
 **(WIP)**
 
-A much lighter-weight arxiv-sanity re-write. Currently runs only locally and doesn't exist as a website on the internet. However, the code is in a semi "feature-complete" state in the sense that you can look through arxiv papers, tag any of them arbitrarily, and then arxiv-sanity-lite recommends similar papers for each tag based on SVM on tfidf vectors constructed from the paper abstracts. So that's pretty cool, I find this personally plenty useful already, and it may be useful to you as well!
+A much lighter-weight arxiv-sanity from-scratch re-write. Periodically polls arxiv API for new papers of interest and adds them to a database. Then allows a user to tag papers of interest with arbitrary tags, and recommends new papers for each tag based on SVMs running on tfidf features of paper abstracts. Allows one to search, rank, sort, slice and dice these results. Create your own tags, track recent arxiv papers in your area, and don't miss out!
 
-I hope to make this good over time and once it's ready to also host it publicly, deprecating the current bloated arxiv-sanity in favor of this new format. The biggest remaining todo's are adding user accounts and making everything nicer, faster, and more scalable as the number of papers in the database grows.
+I am running a live version of this code on [arxiv-sanity-lite.com](https://arxiv-sanity-lite.com).
 
 ![Screenshot](screenshot.jpg)
 
 #### To run
 
-- (Periodically) run arxiv_daemon.py to add recent papers from arxiv to the database.
-- Then run compute.py to re-calculate tfidf features on the paper abstracts and save those to database.
-- Finally run serve.py to start the server and access the frontend layer over the data, e.g.: `export FLASK_APP=serve.py; flask run`.
+To run this locally I usually run the following script to update the database with any new papers. I typically schedule this via a periodic cron job:
+
+```bash
+#!/bin/bash
+
+python3 arxiv_daemon.py --num 2000
+
+if [ $? -eq 0 ]; then
+    echo "New papers detected! Running compute.py"
+    python3 compute.py
+else
+    echo "No new papers were added, skipping feature computation"
+fi
+```
+
+You can see that updating the database is a matter of first downloading the new papers via the arxiv api using `arxiv_daemon.py`, and then running `compute.py` to compute the tfidf features of the papers. Finally to serve the flask server locally we'd run something like:
+
+```bash
+export FLASK_APP=serve.py; flask run
+```
+
+All of the database will be stored inside the `data` directory. Finally, if you'd like to run your own instance on the interwebs I recommend simply running the above on a [Linode](https://www.linode.com), e.g. I am running this code currently on the smallest "Nanode 1 GB" instance indexing about 30K papers, which costs $5/month.
 
 #### todos
 
-- add user accounts so we can shipit
-- the metas table should not be a sqlitedict but a proper sqlite table, for efficiency
-- build a reverse index to support faster search, right now we iterate through the entire database
+- I need a proper requirements.txt and such
+- The metas table should not be a sqlitedict but a proper sqlite table, for efficiency
+- Build a reverse index to support faster search, right now we iterate through the entire database
 
 #### License
 
