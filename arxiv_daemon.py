@@ -92,6 +92,9 @@ if __name__ == '__main__':
             if args.break_after > 0 and zero_updates_in_a_row >= args.break_after:
                 logging.info("breaking out early, no new papers %d times in a row" % (args.break_after, ))
                 break
+            elif k == 0:
+                logging.info("our very first call for the latest there were no new papers, exitting")
+                break
         else:
             zero_updates_in_a_row = 0
 
