@@ -302,14 +302,22 @@ def stats():
     context = default_context()
     mdb = get_metas()
     kv = {k:v for k,v in mdb.items()} # read all of metas to memory at once, for efficiency
+    times = [v['_time'] for v in kv.values()]
     tstr = lambda t: time.strftime('%b %d %Y', time.localtime(t))
+
     context['num_papers'] = len(kv)
     if len(kv) > 0:
-        context['earliest_paper'] = tstr(min(kv.values(), key=lambda x: x['_time'])['_time'])
-        context['latest_paper'] = tstr(max(kv.values(), key=lambda x: x['_time'])['_time'])
+        context['earliest_paper'] = tstr(min(times))
+        context['latest_paper'] = tstr(max(times))
     else:
         context['earliest_paper'] = 'N/A'
         context['latest_paper'] = 'N/A'
+
+    # count number of papers from various time deltas to now
+    tnow = time.time()
+    for thr in [1, 6, 12, 24, 48, 72, 96]:
+        context['thr_%d' % thr] = len([t for t in times if t > tnow - thr*60*60])
+
     return render_template('stats.html', **context)
 
 @app.route('/about')
