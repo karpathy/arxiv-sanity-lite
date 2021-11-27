@@ -8,6 +8,7 @@ ideas:
 """
 
 import os
+import re
 import time
 from random import shuffle
 
@@ -19,7 +20,7 @@ from flask import render_template
 from flask import g # global session-level object
 from flask import session
 
-from aslite.db import get_papers_db, get_metas_db, get_tags_db, get_last_active_db
+from aslite.db import get_papers_db, get_metas_db, get_tags_db, get_last_active_db, get_email_db
 from aslite.db import load_features
 
 # -----------------------------------------------------------------------------
@@ -291,6 +292,9 @@ def inspect():
 @app.route('/profile')
 def profile():
     context = default_context()
+    with get_email_db() as edb:
+        email = edb.get(g.user, '')
+        context['email'] = email
     return render_template('profile.html', **context)
 
 @app.route('/stats')
@@ -405,4 +409,21 @@ def login():
 @app.route('/logout')
 def logout():
     session.pop('user', None)
+    return redirect(url_for('profile'))
+
+# -----------------------------------------------------------------------------
+# user settings and configurations
+
+@app.route('/register_email', methods=['POST'])
+def register_email():
+    email = request.form['email']
+
+    if g.user:
+        # do some basic input validation
+        proper_email = re.match(r'^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$', email, re.IGNORECASE)
+        if email == '' or proper_email: # allow empty email, meaning no email
+            # everything checks out, write to the database
+            with get_email_db(flag='c') as edb:
+                edb[g.user] = email
+
     return redirect(url_for('profile'))

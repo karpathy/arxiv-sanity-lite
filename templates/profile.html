@@ -4,11 +4,28 @@
 {% endblock %}
 
 {% block content %}
-<div id="wrap">
+<div id="profilewrap">
 
     {% if user %}
     <div>
         <div>Logged in user: {{ user }}</div>
+        <br>
+        <div>
+            <b>Email recommendations</b>
+            <div>
+                Users can receive regular new paper recommendations via email based on their tags.
+                (This is still being developed, may not be running or may be unreliable.)
+                Register your email address below to receive these recommendations.
+                To stop the recommendations simply delete your email address.
+            </div>
+            <div>
+                <form action="{{ url_for('register_email') }}" method="post">
+                <input type="text" name="email" placeholder="Email address" value="{{ email }}">
+                <input type="submit" value="Set">
+                </form>
+            </div>
+        </div>
+        <br>
         <div>
             <a href="{{ url_for('logout') }}">Log out</a>
         </div>

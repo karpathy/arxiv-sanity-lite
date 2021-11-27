@@ -124,6 +124,11 @@ def get_last_active_db(flag='r', autocommit=True):
     ladb = SqliteDict(DICT_DB_FILE, tablename='last_active', flag=flag, autocommit=autocommit)
     return ladb
 
+def get_email_db(flag='r', autocommit=True):
+    assert flag in ['r', 'c']
+    edb = SqliteDict(DICT_DB_FILE, tablename='email', flag=flag, autocommit=autocommit)
+    return edb
+
 # -----------------------------------------------------------------------------
 """
 our "feature store" is currently just a pickle file, may want to consider hdf5 in the future
