@@ -131,6 +131,9 @@ body {
     margin-top: 5px;
     font-size: 14px;
 }
+#cbox input {
+    margin-bottom: 5px;
+}
 #cbox_fast {
     font-size: 14px;
 }
