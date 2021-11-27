@@ -19,7 +19,7 @@ from flask import render_template
 from flask import g # global session-level object
 from flask import session
 
-from aslite.db import get_papers_db, get_metas_db, get_tags_db
+from aslite.db import get_papers_db, get_metas_db, get_tags_db, get_last_active_db
 from aslite.db import load_features
 
 # -----------------------------------------------------------------------------
@@ -64,6 +64,12 @@ def get_metas():
 @app.before_request
 def before_request():
     g.user = session.get('user', None)
+
+    # record activity on this user so we can reserve periodic
+    # recommendations heavy compute only for active users
+    if g.user:
+        with get_last_active_db(flag='c') as last_active_db:
+            last_active_db[g.user] = int(time.time())
 
 @app.teardown_request
 def close_connection(error=None):

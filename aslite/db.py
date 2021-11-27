@@ -116,8 +116,13 @@ def get_metas_db(flag='r', autocommit=True):
 
 def get_tags_db(flag='r', autocommit=True):
     assert flag in ['r', 'c']
-    ddb = CompressedSqliteDict(DICT_DB_FILE, tablename='tags', flag=flag, autocommit=autocommit)
-    return ddb
+    tdb = CompressedSqliteDict(DICT_DB_FILE, tablename='tags', flag=flag, autocommit=autocommit)
+    return tdb
+
+def get_last_active_db(flag='r', autocommit=True):
+    assert flag in ['r', 'c']
+    ladb = SqliteDict(DICT_DB_FILE, tablename='last_active', flag=flag, autocommit=autocommit)
+    return ladb
 
 # -----------------------------------------------------------------------------
 """
