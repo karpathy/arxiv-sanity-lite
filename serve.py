@@ -312,6 +312,11 @@ def stats():
         context['latest_paper'] = 'N/A'
     return render_template('stats.html', **context)
 
+@app.route('/about')
+def about():
+    context = default_context()
+    return render_template('about.html', **context)
+
 # -----------------------------------------------------------------------------
 # tag related endpoints: add, delete tags for any paper
 
