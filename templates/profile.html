@@ -8,10 +8,13 @@
 
     {% if user %}
     <div>
-        <div>Logged in user: {{ user }}</div>
+        <div>
+            <div><b>Current session</b></div>
+            <div>Logged in user: {{ user }}</div>
+        </div>
         <br>
         <div>
-            <b>Email recommendations</b>
+            <div><b>Email recommendations</b></div>
             <div>
                 Users can receive regular new paper recommendations via email based on their tags.
                 (This is still being developed, may not be running or may be unreliable.)
