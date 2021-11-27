@@ -2,7 +2,6 @@
 Extracts tfidf features from all paper abstracts and saves them to disk.
 """
 
-import pickle
 import argparse
 
 import numpy as np
