@@ -5,7 +5,39 @@
 
 {% block content %}
 <div id="wrap">
-    This is where the user gets to log in, or see information about their account if logged in.
+
+    {% if user %}
+    <div>
+        <div>Logged in user: {{ user }}</div>
+        <div>
+            <a href="{{ url_for('logout') }}">Log out</a>
+        </div>
+    </div>
+    {% else %}
+    <div>
+
+        <div id="profile-warning">
+            <p>
+            Okay, arxiv-sanity-lite uses a super lite version of
+            "user accounts" where there are no passwords. Basically, you can "log in"
+            with any arbitrary username. If you want to share your library with a
+            friend, you can just tell them the username. And if you'd like to keep your
+            account private, just make your username be something unique
+            and write it down somewhere safe.
+            </p>
+            <b>TLDR: there are no passwords!</b>
+        </div>
+
+        <form id="profile-login-form" action="/login" method="POST">
+            <div class="form-group">
+              <label>Username:</label>
+              <input class="form-control" type="text" name="username">
+            </div>
+            <button type="submit" class="btn btn-primary">Log in</button>
+        </form>
+    </div>
+    {% endif %}
+
 </div>
 {% endblock %}
 

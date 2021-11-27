@@ -7,8 +7,8 @@ ideas:
 - special single-image search just for paper similarity
 """
 
+import os
 import time
-import pickle
 from random import shuffle
 
 import numpy as np
@@ -17,6 +17,7 @@ from sklearn import svm
 from flask import Flask, request, redirect, url_for
 from flask import render_template
 from flask import g # global session-level object
+from flask import session
 
 from aslite.db import get_papers_db, get_metas_db, get_tags_db
 from aslite.db import load_features
@@ -24,8 +25,19 @@ from aslite.db import load_features
 # -----------------------------------------------------------------------------
 # inits and globals
 
-app = Flask(__name__)
 RET_NUM = 100 # number of papers to return per page
+
+app = Flask(__name__)
+
+# set the secret key so we can cryptographically sign cookies and maintain sessions
+if os.path.isfile('secret_key.txt'):
+    # example of generating a good key on your system is:
+    # import secrets; secrets.token_urlsafe(16)
+    sk = open('secret_key.txt').read().strip()
+else:
+    print("WARNING: no secret key found, using default devkey")
+    sk = 'devkey'
+app.secret_key = sk
 
 # -----------------------------------------------------------------------------
 # globals that manage the (lazy) loading of various state for a request
@@ -51,8 +63,7 @@ def get_metas():
 
 @app.before_request
 def before_request():
-  g.user = 'root' # current default user, as we have no accounts db at this time just yet
-  #g.user = None # if noone is logged in, will be the default state shortly
+    g.user = session.get('user', None)
 
 @app.teardown_request
 def close_connection(error=None):
@@ -355,3 +366,22 @@ def delete_tag(tag=None):
 
     print("deleted tag %s for user %s" % (tag, g.user))
     return "ok: " + str(d) # return back the user library for debugging atm
+
+# -----------------------------------------------------------------------------
+# endpoints to log in and out
+
+@app.route('/login', methods=['POST'])
+def login():
+
+    # the user is logged out but wants to log in, ok
+    if g.user is None and request.form['username']:
+        username = request.form['username']
+        if len(username) > 0: # one more paranoid check
+            session['user'] = username
+
+    return redirect(url_for('profile'))
+
+@app.route('/logout')
+def logout():
+    session.pop('user', None)
+    return redirect(url_for('profile'))

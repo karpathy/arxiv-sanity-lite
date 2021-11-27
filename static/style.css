@@ -181,3 +181,46 @@ body {
     right: 10px;
     top: 10px;
 }
+#profile-warning {
+    margin: 10px;
+    padding: 10px;
+    font-size: 16px;
+    background-color: #fdd;
+    border-radius: 5px;
+}
+#profile-warning p {
+    margin: 0;
+    padding: 0;
+}
+#profile-login-form {
+    width: 400px;
+    margin: 30px auto;
+    font-size: 18px;
+}
+#profile-login-form .form-control {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    margin: 5px 0 10px 0;
+    padding: 5px;
+    height: 34px;
+    font-size: 16px;
+    line-height: 1.42857143;
+    color: #555;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+#profile-login-form .btn {
+    display: block;
+    width: 100%;
+    padding: 5px;
+    margin: 0;
+    height: 34px;
+    font-size: 14px;
+    line-height: 1.42857143;
+    color: #fff;
+    background-color: #337ab7;
+    border: 1px solid #2e6da4;
+    border-radius: 4px;
+    cursor: pointer;
+}
