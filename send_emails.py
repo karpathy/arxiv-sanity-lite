@@ -204,13 +204,17 @@ if __name__ == "__main__":
         # calculate the recommendations
         pids, scores = calculate_recommendation(tags, time_delta=TIME_DELTA)
         print("user %s has %d recommendations over last %d days" % (user, len(pids), TIME_DELTA))
+        if len(pids) == 0:
+            print("skipping the rest, no recommendations were produced")
+            continue
 
         # render the html
         print("rendering top %d recommendations into a report..." % (NUM_RECCOMENDATIONS, ))
         html = render_recommendations(pids, scores, num_recommendations=NUM_RECCOMENDATIONS)
         # temporarily for debugging write recommendations to disk for manual inspection
-        with open('recco/%s.html' % (user, ), 'w') as f:
-            f.write(html)
+        if os.path.isdir('recco'):
+            with open('recco/%s.html' % (user, ), 'w') as f:
+                f.write(html)
 
         # actually send the email
         print("sending email...")
