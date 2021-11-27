@@ -14,6 +14,7 @@ const UTag = props => {
 
 const Paper = props => {
     const p = props.paper;
+
     const adder = () => fetch("/add/" + p.id + "/" + prompt("tag to add to this paper:"))
                         .then(response => console.log(response.text()));
     const subber = () => fetch("/sub/" + p.id + "/" + prompt("tag to subtract from this paper:"))
@@ -22,6 +23,18 @@ const Paper = props => {
     const similar_url = "/?rank=pid&pid=" + p.id;
     const inspect_url = "/inspect?pid=" + p.id;
 
+    // if the user is logged in then we can show add/sub buttons
+    let utag_controls = null;
+    if(user) {
+        utag_controls = (
+            <div class='rel_utags'>
+                <div class="rel_utag rel_utag_add" onClick={adder}>+</div>
+                <div class="rel_utag rel_utag_sub" onClick={subber}>-</div>
+                {utags}
+            </div>
+        )
+    }
+
     return (
     <div class='rel_paper'>
         <div class="rel_score">{p.weight.toFixed(2)}</div>
@@ -29,11 +42,7 @@ const Paper = props => {
         <div class='rel_authors'>{p.authors}</div>
         <div class="rel_time">{p.time}</div>
         <div class='rel_tags'>{p.tags}</div>
-        <div class='rel_utags'>
-            <div class="rel_utag rel_utag_add" onClick={adder}>+</div>
-            <div class="rel_utag rel_utag_sub" onClick={subber}>-</div>
-            {utags}
-        </div>
+        {utag_controls}
         <div class='rel_abs'>{p.summary}</div>
         <div class='rel_more'><a href={similar_url}>similar</a></div>
         <div class='rel_inspect'><a href={inspect_url}>inspect</a></div>

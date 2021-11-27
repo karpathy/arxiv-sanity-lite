@@ -10,6 +10,9 @@
 <!-- Favicon -->
 <link rel="shortcut icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}" />
 
+<script>
+var user = {{ user | tojson }};
+</script>
 {% block variables %}
 {% endblock %}
 
