@@ -287,6 +287,21 @@ def profile():
     context = default_context()
     return render_template('profile.html', **context)
 
+@app.route('/stats')
+def stats():
+    context = default_context()
+    mdb = get_metas()
+    kv = {k:v for k,v in mdb.items()} # read all of metas to memory at once, for efficiency
+    tstr = lambda t: time.strftime('%b %d %Y', time.localtime(t))
+    context['num_papers'] = len(kv)
+    if len(kv) > 0:
+        context['earliest_paper'] = tstr(min(kv.values(), key=lambda x: x['_time'])['_time'])
+        context['latest_paper'] = tstr(max(kv.values(), key=lambda x: x['_time'])['_time'])
+    else:
+        context['earliest_paper'] = 'N/A'
+        context['latest_paper'] = 'N/A'
+    return render_template('stats.html', **context)
+
 # -----------------------------------------------------------------------------
 # tag related endpoints: add, delete tags for any paper
 

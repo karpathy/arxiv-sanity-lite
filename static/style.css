@@ -4,7 +4,6 @@ body {
     font-family: sans-serif;
     line-height: 1.2;
 }
-
 #header {
     height: 24px;
     background-color: #844;
@@ -13,6 +12,17 @@ body {
     padding-left: 10px;
     border-bottom: 1px solid #622;
 }
+#home-link {
+    display: inline-block;
+ }
+ #stats-link {
+    float: right;
+    margin: 0 10px 0 10px;
+ }
+ #login-link {
+    float: right;
+    margin: 0 10px 0 10px;
+ }
 #controls {
     margin: 10px 40px 0 40px;
     background-color: #eee;
@@ -178,12 +188,6 @@ body {
     display: inline-block;
     margin-left: 5px;
 }
-#login-link {
-    /* position on the right of the header */
-    position: absolute;
-    right: 10px;
-    top: 10px;
-}
 #profile-warning {
     margin: 10px;
     padding: 10px;
@@ -233,4 +237,8 @@ body {
     color: #777;
     font-size: 14px;
     padding: 3px;
+}
+#statswrap {
+    margin: 10px 40px 0 40px;
+    font-size: 16px;
 }
