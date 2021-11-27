@@ -154,7 +154,7 @@ def send_email(to, html):
     sg = sendgrid.SendGridAPIClient(api_key=api_key)
 
     # construct the email
-    from_email = Email("arxiv-sanity-lite-admin@arxiv-sanity-lite.com")
+    from_email = Email("admin@arxiv-sanity-lite.com")
     to_email = To(to)
     subject = tnow_str + " Arxiv Sanity Lite recommendations"
     content = Content("text/html", html)
