@@ -99,6 +99,9 @@ body {
     border-radius: 4px;
     cursor: pointer;
 }
+.rel_utag_all { /* distinguishes the special 'all' tag from others */
+    background-color: #909;
+}
 .rel_utag_add { /* adds a paper to a tag */
     background-color: #55f;
     margin-right: 2px;

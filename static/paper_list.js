@@ -65,8 +65,9 @@ const PaperList = props => {
 const Tag = props => {
     const t = props.tag;
     const turl = "/?rank=tags&tags=" + t.name;
+    const tag_class = 'rel_utag' + (t.name === 'all' ? ' rel_utag_all' : '');
     return (
-        <div class='rel_utag'>
+        <div class={tag_class}>
             <a href={turl}>
                 {t.n} {t.name}
             </a>
