@@ -11,6 +11,8 @@ to manually register with sendgrid yourself, get an API key and put it in the fi
 
 import os
 import time
+import argparse
+
 import numpy as np
 from sklearn import svm
 
@@ -161,15 +163,22 @@ def send_email(to, html):
     mail = Mail(from_email, to_email, subject, content)
 
     # hope for the best :)
-    response = sg.client.mail.send.post(request_body=mail.get())
-    print(response.status_code)
+    if not args.dry_run:
+        response = sg.client.mail.send.post(request_body=mail.get())
+        print(response.status_code)
+        pass
 
 # -----------------------------------------------------------------------------
 
 if __name__ == "__main__":
 
-    TIME_DELTA = 3 # how recent papers are we recommending? in days
-    NUM_RECCOMENDATIONS = 20 # how many papers to recommend?
+    parser = argparse.ArgumentParser(description='Sends emails with recommendations')
+    parser.add_argument('-n', '--num-recommendations', type=int, default=20, help='number of recommendations to send per person')
+    parser.add_argument('-t', '--time-delta', type=int, default=3, help='how recent papers to recommended, in days')
+    parser.add_argument('-d', '--dry-run', type=int, default=0, help='if set to 1 do not actually send the emails')
+    parser.add_argument('-u', '--user', type=str, default='', help='restrict recommendations only to a single given user (used for debugging)')
+    args = parser.parse_args()
+    print(args)
 
     tnow = time.time()
     tnow_str = time.strftime('%b %d', time.localtime(tnow)) # e.g. "Nov 27"
@@ -200,17 +209,20 @@ if __name__ == "__main__":
         if not email:
             print("skipping user %s, no email" % (user, ))
             continue
+        if args.user and user != args.user:
+            print("skipping user %s, not %s" % (user, args.user))
+            continue
 
         # calculate the recommendations
-        pids, scores = calculate_recommendation(tags, time_delta=TIME_DELTA)
-        print("user %s has %d recommendations over last %d days" % (user, len(pids), TIME_DELTA))
+        pids, scores = calculate_recommendation(tags, time_delta=args.time_delta)
+        print("user %s has %d recommendations over last %d days" % (user, len(pids), args.time_delta))
         if len(pids) == 0:
             print("skipping the rest, no recommendations were produced")
             continue
 
         # render the html
-        print("rendering top %d recommendations into a report..." % (NUM_RECCOMENDATIONS, ))
-        html = render_recommendations(pids, scores, num_recommendations=NUM_RECCOMENDATIONS)
+        print("rendering top %d recommendations into a report..." % (args.num_recommendations, ))
+        html = render_recommendations(pids, scores, num_recommendations=args.num_recommendations)
         # temporarily for debugging write recommendations to disk for manual inspection
         if os.path.isdir('recco'):
             with open('recco/%s.html' % (user, ), 'w') as f:
