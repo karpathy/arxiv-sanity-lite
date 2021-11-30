@@ -55,7 +55,7 @@ body {
 <body>
 
 <br><br>
-<div>Good morning! Here are your daily <a href="https://arxiv-sanity-lite.com">arxiv-sanity-lite</a> recommendations of very recent papers:</div>
+<div>Hi! Here are your <a href="https://arxiv-sanity-lite.com">arxiv-sanity-lite</a> recommendations. __STATS__</div>
 <br><br>
 
 <div>
@@ -66,7 +66,7 @@ body {
 <div>
 To stop these emails remove your email in your <a href="https://arxiv-sanity-lite.com/profile">account</a> settings.
 </div>
-<br><br>
+<div> <3, arxiv-sanity-lite. </div>
 
 </body>
 </html>
@@ -115,11 +115,11 @@ def calculate_recommendation(
 
 # -----------------------------------------------------------------------------
 
-def render_recommendations(pids, scores, num_recommendations = 10):
+def render_recommendations(tags, pids, scores):
     # render the paper recommendations into the html template
 
     parts = []
-    n = min(len(scores), num_recommendations)
+    n = min(len(scores), args.num_recommendations)
     for score, pid in zip(scores[:n], pids[:n]):
         p = pdb[pid]
         authors = ', '.join(a['name'] for a in p['authors'])
@@ -141,8 +141,22 @@ def render_recommendations(pids, scores, num_recommendations = 10):
 """ % (score, p['link'], p['title'], authors, summary)
         )
 
+    # render the final html
+    out = template
+
+    # render the recommendations
     final = '<table>' + ''.join(parts) + '</table>'
-    out = template.replace('__CONTENT__', final)
+    out = out.replace('__CONTENT__', final)
+
+    # render the stats
+    num_papers_tagged = len(set().union(*tags.values()))
+    stats = f"We took the {num_papers_tagged} papers across your {len(tags)} tags and \
+              ranked {len(pids)} papers that showed up on arxiv over the last \
+              {args.time_delta} days using tfidf SVMs over paper abstracts. Below are the \
+              top {args.num_recommendations} papers. Remember that the more you tag, \
+              the better this gets:"
+    out = out.replace('__STATS__', stats)
+
     return out
 
 # -----------------------------------------------------------------------------
@@ -222,7 +236,7 @@ if __name__ == "__main__":
 
         # render the html
         print("rendering top %d recommendations into a report..." % (args.num_recommendations, ))
-        html = render_recommendations(pids, scores, num_recommendations=args.num_recommendations)
+        html = render_recommendations(tags, pids, scores)
         # temporarily for debugging write recommendations to disk for manual inspection
         if os.path.isdir('recco'):
             with open('recco/%s.html' % (user, ), 'w') as f:
