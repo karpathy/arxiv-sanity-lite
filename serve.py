@@ -376,13 +376,20 @@ def sub(pid=None, tag=None):
         if tag not in d:
             return "user doesn't have the tag %s" % (tag, )
         else:
-            d[tag].remove(pid)
+            if pid in d[tag]:
 
-        # write back to database
-        tags_db[g.user] = d
+                # remove this pid from the tag
+                d[tag].remove(pid)
 
-    print("removed from paper %s the tag %s for user %s" % (pid, tag, g.user))
-    return "ok: " + str(d) # return back the user library for debugging atm
+                # if this was the last paper in this tag, also delete the tag
+                if len(d[tag]) == 0:
+                    del d[tag]
+
+                # write back the resulting dict to database
+                tags_db[g.user] = d
+                return "ok removed pid %s from tag %s" % (pid, tag)
+            else:
+                return "user doesn't have paper %s in tag %s" % (pid, tag)
 
 @app.route('/del/<tag>')
 def delete_tag(tag=None):
