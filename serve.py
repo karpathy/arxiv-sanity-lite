@@ -335,6 +335,8 @@ def add(pid=None, tag=None):
         return "error, not logged in"
     if tag == 'all':
         return "error, cannot add the protected tag 'all'"
+    elif tag == 'null':
+        return "error, cannot add the protected tag 'null'"
 
     with get_tags_db(flag='c') as tags_db:
 
