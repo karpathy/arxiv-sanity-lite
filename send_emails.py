@@ -227,6 +227,12 @@ if __name__ == "__main__":
             print("skipping user %s, not %s" % (user, args.user))
             continue
 
+        # verify that we have at least one positive example...
+        num_papers_tagged = len(set().union(*tags.values()))
+        if num_papers_tagged == 0:
+            print("skipping user %s, no papers tagged" % (user, ))
+            continue
+
         # calculate the recommendations
         pids, scores = calculate_recommendation(tags, time_delta=args.time_delta)
         print("user %s has %d recommendations over last %d days" % (user, len(pids), args.time_delta))
