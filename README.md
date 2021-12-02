@@ -34,6 +34,12 @@ All of the database will be stored inside the `data` directory. Finally, if you'
 
 Finally, if you'd like to send periodic emails to users about new papers, see the `send_emails.py` script. I run this script in a daily cron job.
 
+#### Requirements
+Install requirements:
+```bash
+pip install -r requirements.txt
+```
+
 #### todos
 
 - I need a proper requirements.txt and such
