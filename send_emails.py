@@ -216,6 +216,7 @@ if __name__ == "__main__":
     pdb = get_papers_db()
 
     # iterate all users, create recommendations, send emails
+    num_sent = 0
     for user, tags in tags.items():
 
         # verify that we have an email for this user
@@ -251,6 +252,9 @@ if __name__ == "__main__":
         # actually send the email
         print("sending email...")
         send_email(email, html)
+        num_sent += 1
 
 
     print("done.")
+    print("sent %d emails" % (num_sent, ))
+
