@@ -64,7 +64,7 @@ body {
 
 <br><br>
 <div>
-To stop these emails remove your email in your <a href="https://arxiv-sanity-lite.com/profile">account</a> settings.
+To stop these emails remove your email in your <a href="https://arxiv-sanity-lite.com/profile">account</a> settings. (your account is __ACCOUNT__).
 </div>
 <div> <3, arxiv-sanity-lite. </div>
 
@@ -115,7 +115,7 @@ def calculate_recommendation(
 
 # -----------------------------------------------------------------------------
 
-def render_recommendations(tags, pids, scores):
+def render_recommendations(user, tags, pids, scores):
     # render the paper recommendations into the html template
 
     parts = []
@@ -156,6 +156,9 @@ def render_recommendations(tags, pids, scores):
               top {args.num_recommendations} papers. Remember that the more you tag, \
               the better this gets:"
     out = out.replace('__STATS__', stats)
+
+    # render the account
+    out = out.replace('__ACCOUNT__', user)
 
     return out
 
@@ -243,7 +246,7 @@ if __name__ == "__main__":
 
         # render the html
         print("rendering top %d recommendations into a report..." % (args.num_recommendations, ))
-        html = render_recommendations(tags, pids, scores)
+        html = render_recommendations(user, tags, pids, scores)
         # temporarily for debugging write recommendations to disk for manual inspection
         if os.path.isdir('recco'):
             with open('recco/%s.html' % (user, ), 'w') as f:
