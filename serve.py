@@ -118,7 +118,8 @@ def svm_rank(tags: str = '', pid: str = '', svm_c: str = ''):
 
     # tag can be one tag or a few comma-separated tags or 'all' for all tags we have in db
     # pid can be a specific paper id to set as positive for a kind of nearest neighbor search
-    assert tags or pid
+    if not (tags or pid):
+        return [], []
 
     # load all of the features
     features = load_features()
