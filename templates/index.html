@@ -4,6 +4,8 @@
 <script>
 var papers = {{ papers | tojson }};
 var tags = {{ tags | tojson }};
+var words = {{ words | tojson }};
+var words_desc = {{ words_desc | tojson }};
 var gvars = {{ gvars | tojson }};
 </script>
 {% endblock %}
@@ -43,8 +45,12 @@ var gvars = {{ gvars | tojson }};
                 <input name="pid" type="text" id="pid_field" value="{{ gvars.pid }}">
 
                 <!-- current time_filter, in a text field -->
-                <label for="time_filter">time_filter: </label>
+                <label for="time_filter">time_filter (days): </label>
                 <input name="time_filter" type="text" id="time_filter_field" value="{{ gvars.time_filter }}">
+
+                <!-- current svm_c, in a text field -->
+                <label for="svm_c">svm_c: </label>
+                <input name="svm_c" type="text" id="svm_c_field" value="{{ gvars.svm_c }}">
 
                 <!-- current skip_have: one of yes or no -->
                 <label for="skip_have">skip_have: </label>
@@ -75,10 +81,16 @@ var gvars = {{ gvars | tojson }};
 </div>
 {% endif %}
 
+{% if user and words %}
+<div id="wordwrap" style="display:none;">
+</div>
+{% endif %}
+
 <div id="wrap">
 </div>
 {% endblock %}
 
 {% block elements %}
 <script src="{{ url_for('static', filename='paper_list.js') }}" type="text/babel"></script>
+<script src="{{ url_for('static', filename='word_list.js') }}" type="text/babel"></script>
 {% endblock %}

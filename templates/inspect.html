@@ -4,6 +4,7 @@
 <script>
 var paper = {{ paper | tojson }};
 var words = {{ words | tojson }};
+var words_desc = {{ words_desc | tojson }};
 </script>
 {% endblock %}
 
@@ -16,4 +17,5 @@ var words = {{ words | tojson }};
 
 {% block elements %}
 <script src="{{ url_for('static', filename='paper_detail.js') }}" type="text/babel"></script>
+<script src="{{ url_for('static', filename='word_list.js') }}" type="text/babel"></script>
 {% endblock %}

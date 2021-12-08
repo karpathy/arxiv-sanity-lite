@@ -253,3 +253,25 @@ body {
     margin: 10px 40px 0 40px;
     font-size: 16px;
 }
+#tags_field {
+    width: 100px;
+}
+#pid_field {
+    width: 60px;
+}
+#time_filter_field {
+    width: 20px;
+}
+#svm_c_field {
+    width: 30px;
+}
+#tagList {
+    display: inline-block;
+}
+#inspect_svm {
+    display: inline-block;
+    font-size: 16px;
+    cursor: pointer;
+    text-decoration: underline;
+    color: #009;
+}

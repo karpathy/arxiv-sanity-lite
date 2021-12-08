@@ -80,12 +80,16 @@ const TagList = props => {
     const tlst = lst.map((jtag, ix) => <Tag key={ix} tag={jtag} />);
     const deleter = () => fetch("/del/" + prompt("delete tag name:"))
                           .then(response => console.log(response.text()));
+    // show the #wordwrap element if the user clicks inspect
+    const show_inspect = () => { document.getElementById("wordwrap").style.display = "block"; };
+    const inspect_elt = words.length > 0 ? <div id="inspect_svm" onClick={show_inspect}>inspect</div> : null;
     return (
         <div>
             <div class="rel_tag" onClick={deleter}>-</div>
             <div id="tagList" class="rel_utags">
                 {tlst}
             </div>
+            {inspect_elt}
         </div>
     )
 }

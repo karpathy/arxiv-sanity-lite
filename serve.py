@@ -114,12 +114,12 @@ def time_rank():
     scores = [(tnow - v['_time'])/60/60/24 for k, v in ms] # time delta in days
     return pids, scores
 
-def svm_rank(tags: str = '', pid: str = '', svm_c: str = ''):
+def svm_rank(tags: str = '', pid: str = '', C: float = 0.01):
 
     # tag can be one tag or a few comma-separated tags or 'all' for all tags we have in db
     # pid can be a specific paper id to set as positive for a kind of nearest neighbor search
     if not (tags or pid):
-        return [], []
+        return [], [], []
 
     # load all of the features
     features = load_features()
@@ -143,15 +143,9 @@ def svm_rank(tags: str = '', pid: str = '', svm_c: str = ''):
                     y[ptoi[pid]] = 1.0
 
     if y.sum() == 0:
-        return [], [] # there are no positives?
+        return [], [], [] # there are no positives?
 
     # classify
-    C = 0.1
-    if svm_c: # if a desired C is provided attempt to use it as a float
-        try:
-            C = float(svm_c)
-        except ValueError:
-            C = 1.0
     clf = svm.LinearSVC(class_weight='balanced', verbose=False, max_iter=10000, tol=1e-6, C=C)
     clf.fit(x, y)
     s = clf.decision_function(x)
@@ -159,7 +153,18 @@ def svm_rank(tags: str = '', pid: str = '', svm_c: str = ''):
     pids = [itop[ix] for ix in sortix]
     scores = [100*float(s[ix]) for ix in sortix]
 
-    return pids, scores
+    # get the words that score most positively and most negatively for the svm
+    ivocab = {v:k for k,v in features['vocab'].items()} # index to word mapping
+    weights = clf.coef_[0] # (n_features,) weights of the trained svm
+    sortix = np.argsort(-weights)
+    words = []
+    for ix in list(sortix[:40]) + list(sortix[-20:]):
+        words.append({
+            'word': ivocab[ix],
+            'weight': weights[ix],
+        })
+
+    return pids, scores, words
 
 def search_rank(q: str = ''):
     if not q:
@@ -209,13 +214,20 @@ def main():
     if opt_q:
         opt_rank = 'search'
 
+    # try to parse opt_svm_c into something sensible (a float)
+    try:
+        C = float(opt_svm_c)
+    except ValueError:
+        C = 0.01 # sensible default, i think
+
     # rank papers: by tags, by time, by random
+    words = [] # only populated in the case of svm rank
     if opt_rank == 'search':
         pids, scores = search_rank(q=opt_q)
     elif opt_rank == 'tags':
-        pids, scores = svm_rank(tags=opt_tags, svm_c=opt_svm_c)
+        pids, scores, words = svm_rank(tags=opt_tags, C=C)
     elif opt_rank == 'pid':
-        pids, scores = svm_rank(pid=opt_pid, svm_c=opt_svm_c)
+        pids, scores, words = svm_rank(pid=opt_pid, C=C)
     elif opt_rank == 'time':
         pids, scores = time_rank()
     elif opt_rank == 'random':
@@ -257,6 +269,8 @@ def main():
     context = default_context()
     context['papers'] = papers
     context['tags'] = rtags
+    context['words'] = words
+    context['words_desc'] = "Here are the top 40 most positive and bottom 20 most negative weights of the SVM. If they don't look great then try tuning the regularization strength hyperparameter of the SVM, svm_c, above. Lower C is higher regularization."
     context['gvars'] = {}
     context['gvars']['rank'] = opt_rank
     context['gvars']['tags'] = opt_tags
@@ -264,6 +278,7 @@ def main():
     context['gvars']['time_filter'] = opt_time_filter
     context['gvars']['skip_have'] = opt_skip_have
     context['gvars']['search_query'] = opt_q
+    context['gvars']['svm_c'] = str(C)
     return render_template('index.html', **context)
 
 @app.route('/inspect', methods=['GET'])
@@ -296,6 +311,7 @@ def inspect():
     context = default_context()
     context['paper'] = paper
     context['words'] = words
+    context['words_desc'] = "The following are the tokens and their (tfidf) weight in the paper vector. This is the actual summary that feeds into the SVM to power recommendations, so hopefully it is good and representative!"
     return render_template('inspect.html', **context)
 
 @app.route('/profile')
