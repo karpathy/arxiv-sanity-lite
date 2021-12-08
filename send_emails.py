@@ -150,7 +150,8 @@ def render_recommendations(user, tags, pids, scores):
 
     # render the stats
     num_papers_tagged = len(set().union(*tags.values()))
-    stats = f"We took the {num_papers_tagged} papers across your {len(tags)} tags and \
+    tags_str = ', '.join(['"%s" (%d)' % (t, len(pids)) for t, pids in tags.items()])
+    stats = f"We took the {num_papers_tagged} papers across your {len(tags)} tags ({tags_str}) and \
               ranked {len(pids)} papers that showed up on arxiv over the last \
               {args.time_delta} days using tfidf SVMs over paper abstracts. Below are the \
               top {args.num_recommendations} papers. Remember that the more you tag, \
