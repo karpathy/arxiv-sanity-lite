@@ -200,13 +200,27 @@ def default_context():
 @app.route('/', methods=['GET'])
 def main():
 
-    # GET options and their defaults
-    opt_rank = request.args.get('rank', 'time') # rank type. search|tags|pid|time|random
+    # when someone logged in hits the default '/' page, set some helpful
+    # GET option defaults based on whether or not the user is logged in
+    if g.user and len(request.args) == 0:
+        # user is logged in: show recommendations over recent papers
+        default_rank = 'tags'
+        default_tags = 'all'
+        default_time_filter = '7'
+        default_skip_have = 'yes'
+    else:
+        # a not logged in user: simply show recent papers
+        default_rank = 'time'
+        default_tags = ''
+        default_time_filter = ''
+        default_skip_have = 'no'
+
+    opt_rank = request.args.get('rank', default_rank) # rank type. search|tags|pid|time|random
     opt_q = request.args.get('q', '') # search request in the text box
-    opt_tags = request.args.get('tags', '')  # tags to rank by if opt_rank == 'tag'
+    opt_tags = request.args.get('tags', default_tags)  # tags to rank by if opt_rank == 'tag'
     opt_pid = request.args.get('pid', '')  # pid to find nearest neighbors to
-    opt_time_filter = request.args.get('time_filter', '') # number of days to filter by
-    opt_skip_have = request.args.get('skip_have', 'no') # hide papers we already have?
+    opt_time_filter = request.args.get('time_filter', default_time_filter) # number of days to filter by
+    opt_skip_have = request.args.get('skip_have', default_skip_have) # hide papers we already have?
     opt_svm_c = request.args.get('svm_c', '') # svm C parameter
 
     # if a query is given, override rank to be of type "search"
