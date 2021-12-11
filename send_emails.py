@@ -11,6 +11,7 @@ to manually register with sendgrid yourself, get an API key and put it in the fi
 
 import os
 import time
+import random
 import argparse
 
 import numpy as np
@@ -258,6 +259,8 @@ if __name__ == "__main__":
         send_email(email, html)
         num_sent += 1
 
+        # zzz
+        time.sleep(1 + random.uniform(0, 2))
 
     print("done.")
     print("sent %d emails" % (num_sent, ))
