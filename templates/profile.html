@@ -22,9 +22,11 @@
                 To stop the recommendations simply delete your email address.
             </div>
             <div>
-                <form action="{{ url_for('register_email') }}" method="post">
-                <input type="text" name="email" placeholder="Email address" value="{{ email }}">
-                <input type="submit" value="Set">
+                <form id="email-form" action="{{ url_for('register_email') }}" method="post">
+                    <div class="form-group">
+                        <input type="text" class="form-control" name="email" placeholder="Email address" value="{{ email }}">
+                    </div>
+                    <input type="submit" class="btn" value="Set">
                 </form>
             </div>
         </div>
@@ -53,7 +55,7 @@
               <label>Username:</label>
               <input class="form-control" type="text" name="username">
             </div>
-            <button type="submit" class="btn btn-primary">Log in</button>
+            <button type="submit" class="btn">Log in</button>
         </form>
     </div>
     {% endif %}

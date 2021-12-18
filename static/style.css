@@ -202,12 +202,12 @@ body {
     margin: 0;
     padding: 0;
 }
-#profile-login-form {
-    width: 400px;
+#profile-login-form, #email-form {
+    max-width: 400px;
     margin: 30px auto;
     font-size: 18px;
 }
-#profile-login-form .form-control {
+#profile-login-form .form-control, #email-form .form-control {
     display: block;
     width: 100%;
     box-sizing: border-box;
@@ -220,7 +220,7 @@ body {
     border: 1px solid #ccc;
     border-radius: 4px;
 }
-#profile-login-form .btn {
+#profile-login-form .btn, #email-form .btn {
     display: block;
     width: 100%;
     padding: 5px;
@@ -274,4 +274,10 @@ body {
     cursor: pointer;
     text-decoration: underline;
     color: #009;
+}
+@media only screen and (max-width: 720px) {
+    #controls, #wrap, #profilewrap, #wordwrap, #aboutwrap, #statswrap {
+		margin: 10px 20px 0 20px;
+	}
+
 }
