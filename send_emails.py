@@ -273,13 +273,12 @@ if __name__ == "__main__":
 
         # calculate the recommendations
         pids, scores = calculate_recommendation(tags, time_delta=args.time_delta)
-        print("user %s has %d recommendations over last %d days" % (user, len(pids), args.time_delta))
-        if len(pids) == 0:
-            print("skipping the rest, no recommendations were produced")
+        if all(len(lst) == 0 for tag, lst in pids.items()):
+            print("skipping user %s, no recommendations were produced" % (user, ))
             continue
 
         # render the html
-        print("rendering top %d recommendations into a report..." % (args.num_recommendations, ))
+        print("rendering top %d recommendations into a report for %s..." % (args.num_recommendations, user))
         html = render_recommendations(user, tags, pids, scores)
         # temporarily for debugging write recommendations to disk for manual inspection
         if os.path.isdir('recco'):
