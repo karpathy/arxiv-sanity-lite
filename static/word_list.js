@@ -26,5 +26,7 @@ const WordList = props => {
     )
 }
 
-ReactDOM.render(<WordList words={words} words_desc={words_desc} />,
-                document.getElementById('wordwrap'));
+var elt = document.getElementById('wordwrap');
+if(elt) {
+    ReactDOM.render(<WordList words={words} words_desc={words_desc} />, elt);
+}

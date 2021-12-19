@@ -294,8 +294,6 @@ def main():
     context['gvars']['search_query'] = opt_q
     context['gvars']['svm_c'] = str(C)
     context['gvars']['page_number'] = str(page_number)
-    context['gvars']['prev_page_number'] = str(page_number - 1)
-    context['gvars']['next_page_number'] = str(page_number + 1)
     return render_template('index.html', **context)
 
 @app.route('/inspect', methods=['GET'])

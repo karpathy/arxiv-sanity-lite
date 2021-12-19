@@ -291,4 +291,7 @@ body {
 #link-prev-page, #link-next-page {
     margin: 0 5px 0 5px;
     font-size: 16px;
+    cursor: pointer;
+    color: #009;
+    text-decoration: underline;
 }
