@@ -200,21 +200,13 @@ def default_context():
 @app.route('/', methods=['GET'])
 def main():
 
-    # when someone logged in hits the default '/' page, set some helpful
-    # GET option defaults based on whether or not the user is logged in
-    if g.user and len(request.args) == 0:
-        # user is logged in: show recommendations over recent papers
-        default_rank = 'tags'
-        default_tags = 'all'
-        default_time_filter = '7'
-        default_skip_have = 'yes'
-    else:
-        # a not logged in user: simply show recent papers
-        default_rank = 'time'
-        default_tags = ''
-        default_time_filter = ''
-        default_skip_have = 'no'
+    # default settings
+    default_rank = 'time'
+    default_tags = ''
+    default_time_filter = ''
+    default_skip_have = 'no'
 
+    # override variables with any provided options via the interface
     opt_rank = request.args.get('rank', default_rank) # rank type. search|tags|pid|time|random
     opt_q = request.args.get('q', '') # search request in the text box
     opt_tags = request.args.get('tags', default_tags)  # tags to rank by if opt_rank == 'tag'
