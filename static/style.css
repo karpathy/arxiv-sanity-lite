@@ -262,6 +262,9 @@ body {
 #time_filter_field {
     width: 20px;
 }
+#page_number_field {
+    width: 20px;
+}
 #svm_c_field {
     width: 30px;
 }
@@ -280,4 +283,12 @@ body {
 		margin: 10px 20px 0 20px;
 	}
 
+}
+#pagination {
+    text-align: center;
+    margin-bottom: 20px;
+}
+#link-prev-page, #link-next-page {
+    margin: 0 5px 0 5px;
+    font-size: 16px;
 }

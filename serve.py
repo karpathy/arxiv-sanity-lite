@@ -26,7 +26,7 @@ from aslite.db import load_features
 # -----------------------------------------------------------------------------
 # inits and globals
 
-RET_NUM = 100 # number of papers to return per page
+RET_NUM = 25 # number of papers to return per page
 
 app = Flask(__name__)
 
@@ -214,6 +214,7 @@ def main():
     opt_time_filter = request.args.get('time_filter', default_time_filter) # number of days to filter by
     opt_skip_have = request.args.get('skip_have', default_skip_have) # hide papers we already have?
     opt_svm_c = request.args.get('svm_c', '') # svm C parameter
+    opt_page_number = request.args.get('page_number', '1') # page number for pagination
 
     # if a query is given, override rank to be of type "search"
     # this allows the user to simply hit ENTER in the search field and have the correct thing happen
@@ -257,12 +258,19 @@ def main():
         keep = [i for i,pid in enumerate(pids) if pid not in have]
         pids, scores = [pids[i] for i in keep], [scores[i] for i in keep]
 
-    # crop the results
-    pids = pids[:min(len(pids), RET_NUM)]
+    # crop the number of results to RET_NUM, and paginate
+    try:
+        page_number = max(1, int(opt_page_number))
+    except ValueError:
+        page_number = 1
+    start_index = (page_number - 1) * RET_NUM # desired starting index
+    end_index = min(start_index + RET_NUM, len(pids)) # desired ending index
+    pids = pids[start_index:end_index]
+    scores = scores[start_index:end_index]
 
     # render all papers to just the information we need for the UI
     papers = [render_pid(pid) for pid in pids]
-    for i, p  in enumerate(papers):
+    for i, p in enumerate(papers):
         p['weight'] = float(scores[i])
 
     # build the current tags for the user, and append the special 'all' tag
@@ -285,6 +293,9 @@ def main():
     context['gvars']['skip_have'] = opt_skip_have
     context['gvars']['search_query'] = opt_q
     context['gvars']['svm_c'] = str(C)
+    context['gvars']['page_number'] = str(page_number)
+    context['gvars']['prev_page_number'] = str(page_number - 1)
+    context['gvars']['next_page_number'] = str(page_number + 1)
     return render_template('index.html', **context)
 
 @app.route('/inspect', methods=['GET'])

@@ -10,6 +10,44 @@ var gvars = {{ gvars | tojson }};
 </script>
 {% endblock %}
 
+<script>
+/*
+The JS code in here handles pagination. I really quite dislike it,
+if anyone can think of a cleaner and shorter way please let me know.
+*/
+
+// mod from https://stackoverflow.com/questions/13063838/add-change-parameter-of-url-and-redirect-to-the-new-url/13064060
+function setGetParameter(paramName, paramValue)
+{
+    var url = window.location.href;
+    var hash = location.hash;
+    url = url.replace(hash, ''); // ?
+    if (url.indexOf(paramName + "=") >= 0) {
+        var prefix = url.substring(0, url.indexOf(paramName + "="));
+        var suffix = url.substring(url.indexOf(paramName + "="));
+        suffix = suffix.substring(suffix.indexOf("=") + 1);
+        suffix = (suffix.indexOf("&") >= 0) ? suffix.substring(suffix.indexOf("&")) : "";
+        url = prefix + paramName + "=" + paramValue + suffix;
+    } else {
+        var pre = url.indexOf("?") < 0 ? "?" : "&";
+        url = url + pre + paramName + "=" + paramValue;
+    }
+    window.location.href = url + hash;
+}
+
+// handle pagination by overriding the a href= links
+window.onload = function() {
+    document.getElementById("link-prev-page").onclick = function() {
+        setGetParameter("page", gvars.page - 1);
+        return true;
+    }
+    document.getElementById("link-next-page").onclick = function() {
+        setGetParameter("page", gvars.page + 1);
+        return true;
+    }
+}
+</script>
+
 {% block content %}
 
 {% if not user %}
@@ -86,7 +124,15 @@ var gvars = {{ gvars | tojson }};
 </div>
 {% endif %}
 
+<!-- main content showing all the papers as a list -->
 <div id="wrap">
+</div>
+
+<!-- links to previous and next pages -->
+<div id="pagination">
+    <a href="/?page_number={{ gvars.prev_page_number }}" id="link-prev-page">prev</a>
+    <span>current page: {{ gvars.page_number }} </span>
+    <a href="/?page_number={{ gvars.next_page_number }}" id="link-next-page">next</a>
 </div>
 {% endblock %}
 
