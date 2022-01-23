@@ -158,6 +158,8 @@ def render_recommendations(user, tags, tag_pids, tag_scores):
         summary = summary[:min(500, len(summary))]
         if len(summary) == 500:
             summary += '...'
+        # create the url that will feature this paper on top and also show the most similar papers
+        url = 'https://arxiv-sanity-lite.com/?rank=pid&pid=' + pid
         parts.append(
 """
 <tr>
@@ -168,7 +170,7 @@ def render_recommendations(user, tags, tag_pids, tag_scores):
 <div class="u">%s</div>
 </td>
 </tr>
-""" % (score, p['link'], p['title'], max_source_tag[pid], authors, summary)
+""" % (score, url, p['title'], max_source_tag[pid], authors, summary)
         )
 
     # render the final html
