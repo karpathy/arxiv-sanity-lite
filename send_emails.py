@@ -225,6 +225,7 @@ if __name__ == "__main__":
     parser.add_argument('-t', '--time-delta', type=int, default=3, help='how recent papers to recommended, in days')
     parser.add_argument('-d', '--dry-run', type=int, default=0, help='if set to 1 do not actually send the emails')
     parser.add_argument('-u', '--user', type=str, default='', help='restrict recommendations only to a single given user (used for debugging)')
+    parser.add_argument('-m', '--min-papers', type=int, default=1, help='user must have at least this many papers for us to send recommendations')
     args = parser.parse_args()
     print(args)
 
@@ -264,8 +265,8 @@ if __name__ == "__main__":
 
         # verify that we have at least one positive example...
         num_papers_tagged = len(set().union(*tags.values()))
-        if num_papers_tagged == 0:
-            print("skipping user %s, no papers tagged" % (user, ))
+        if num_papers_tagged < args.min_papers:
+            print("skipping user %s, only has %d papers tagged" % (user, num_papers_tagged))
             continue
 
         # insert a fake entry in tags for the special "all" tag, which is the union of all papers
