@@ -87,6 +87,8 @@ def render_pid(pid):
     # render a single paper with just the information we need for the UI
     pdb = get_papers()
     tags = get_tags()
+    thumb_path = 'static/thumb/' + pid + '.jpg'
+    thumb_url = thumb_path if os.path.isfile(thumb_path) else ''
     d = pdb[pid]
     return dict(
         weight = 0.0,
@@ -97,6 +99,7 @@ def render_pid(pid):
         tags = ', '.join(t['term'] for t in d['tags']),
         utags = [t for t, pids in tags.items() if pid in pids],
         summary = d['summary'],
+        thumb_url = thumb_url,
     )
 
 def random_rank():

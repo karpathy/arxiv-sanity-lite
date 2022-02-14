@@ -3,6 +3,7 @@ body {
     padding: 0;
     font-family: sans-serif;
     line-height: 1.2;
+    background-color: #eee;
 }
 #header {
     height: 24px;
@@ -50,7 +51,7 @@ body {
 .rel_paper {
     margin-bottom: 10px;
     padding: 10px;
-    background-color: #eee;
+    background-color: white;
     border-radius: 5px;
 }
 
