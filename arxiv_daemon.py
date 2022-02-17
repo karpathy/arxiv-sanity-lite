@@ -12,6 +12,7 @@ import argparse
 
 from aslite.arxiv import get_response, parse_response
 from aslite.db import get_papers_db, get_metas_db
+from aslite.paperswithcode import getGithubLink
 
 if __name__ == '__main__':
 
@@ -68,7 +69,24 @@ if __name__ == '__main__':
         nhad, nnew, nreplace = 0, 0, 0
         for p in papers:
             pid = p['_id']
+            # add github_links to p
+            p['github_links'] = getGithubLink(pid)
+            # get github link from paperswithcode.com
             if pid in pdb:
+                # check if old papers have github_links
+                if 'github_links' in pdb[pid]:
+                    # replace if github has been updated by paperswithcode.com 
+                    if p['github_links'] != pdb[pid]['github_links']:
+                        # replace, this one is newer
+                        store(p)
+                        nreplace += 1
+                        continue
+                else:
+                    # replace, this one is newer
+                    store(p)
+                    nreplace += 1
+                    continue
+
                 if p['_time'] > pdb[pid]['_time']:
                     # replace, this one is newer
                     store(p)

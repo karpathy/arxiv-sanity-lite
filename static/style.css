@@ -170,6 +170,11 @@ body {
     display: inline-block;
     margin-right: 10px;
 }
+.rel_github_link {
+    font-size: 14px;
+    display: inline-block;
+    margin-right: 10px;
+}
 #wordList {
     margin-top: 5px;
     margin-bottom: 10px;
