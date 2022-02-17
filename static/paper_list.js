@@ -12,6 +12,14 @@ const UTag = props => {
     )
 }
 
+const GithubLinks = props => {
+    const link = props.link;
+    return (<div class='rel_github_link'>
+        <a href={link}>Link</a>
+    </div>
+    )
+}
+
 const Paper = props => {
     const p = props.paper;
 
@@ -23,6 +31,12 @@ const Paper = props => {
     const similar_url = "/?rank=pid&pid=" + p.id;
     const inspect_url = "/inspect?pid=" + p.id;
     const thumb_img = p.thumb_url === '' ? null : <div class='rel_img'><img src={p.thumb_url} /></div>;
+    let links = null;
+    const github = p.github_links.length > 0 ? <div class='rel_github_link'>Github Links:</div> : null
+    if (p.github_links.length > 0){
+        links = p.github_links.map((link, ix) => <GithubLinks key={ix} link={link}/>)
+    }
+
     // if the user is logged in then we can show add/sub buttons
     let utag_controls = null;
     if(user) {
@@ -47,6 +61,8 @@ const Paper = props => {
         <div class='rel_abs'>{p.summary}</div>
         <div class='rel_more'><a href={similar_url}>similar</a></div>
         <div class='rel_inspect'><a href={inspect_url}>inspect</a></div>
+        {github}
+        {links}
     </div>
     )
 }

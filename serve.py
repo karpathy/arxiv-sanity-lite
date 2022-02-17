@@ -100,6 +100,7 @@ def render_pid(pid):
         utags = [t for t, pids in tags.items() if pid in pids],
         summary = d['summary'],
         thumb_url = thumb_url,
+        github_links = d['github_links'],
     )
 
 def random_rank():
