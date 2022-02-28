@@ -28,33 +28,19 @@ if __name__ == '__main__':
                         token_pattern=r'(?u)\b[a-zA-Z_][a-zA-Z0-9_]+\b',
                         ngram_range=(1, 2), max_features=args.num,
                         norm='l2', use_idf=True, smooth_idf=True, sublinear_tf=True,
-                        max_df=args.max_df, min_df=args.min_df)
+                        max_df=args.max_df, min_df=args.min_df, dtype=np.float32)
 
     pdb = get_papers_db(flag='r')
 
-    def make_corpus(training: bool):
-        assert isinstance(training, bool)
-
-        # determine which papers we will use to build tfidf
-        if training and args.max_docs > 0 and args.max_docs < len(pdb):
-            # crop to a random subset of papers
-            keys = list(pdb.keys())
-            shuffle(keys)
-            keys = keys[:args.max_docs]
-        else:
-            keys = pdb.keys()
-
+    def make_corpus():
         # yield the abstracts of the papers
-        for p in keys:
+        for p in pdb.keys():
             d = pdb[p]
             author_str = ' '.join([a['name'] for a in d['authors']])
             yield ' '.join([d['title'], d['summary'], author_str])
 
     print("training tfidf vectors...")
-    v.fit(make_corpus(training=True))
-
-    print("running inference...")
-    x = v.transform(make_corpus(training=False)).astype(np.float32)
+    x = v.fit_transform(make_corpus())
     print(x.shape)
 
     print("saving to features to disk...")
