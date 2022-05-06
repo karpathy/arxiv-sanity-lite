@@ -9,10 +9,10 @@ ideas:
 
 import os
 import re
-from termios import tcsendbreak
 import time
 from random import shuffle
 import math
+from functools import cache
 
 import numpy as np
 from sklearn import svm
@@ -176,7 +176,8 @@ def svm_rank(tags: str = '', pid: str = '', C: float = 0.01):
         })
 
     return pids, scores, words
-    
+
+@cache
 def tprepro(tweet_text):
   # take tweet, return set of words
   t = tweet_text.lower()
@@ -184,6 +185,43 @@ def tprepro(tweet_text):
   ws = set([w for w in t.split() if not w.startswith('#')])
   return ws
 
+
+def score_tweet(tweet):
+    # give people with more followers more vote, as it's seen by more people and contributes to more hype
+    float_vote = min(math.log10(tweet['user_followers_count'] + 1), 4.0)/2.0
+
+    # uprank tweets that have more likes, retweets, replies, and quotes
+    float_vote += math.log10(tweet['like_count'] + tweet['retweet_count'] + 1)
+    float_vote += math.log10(tweet['reply_count'] + tweet['quote_count'] + 1)
+    return float_vote
+
+def weight_tweet(tweet):
+    papers = get_papers()
+    weight = 10.0
+    # some tweets are really boring, like an rt
+    if "arxiv" in tweet['user_screen_name'].lower():
+        weight -= 1
+
+    if (tweet['text'].lower().startswith('rt') or 
+            tweet['lang'] != 'en' or 
+            len(tweet['text']) < 40):
+        weight -= 1
+    
+    # good tweets make a comment, not just a boring RT, or exactly the post title. Detect these.
+    tweet_words = len(tprepro(tweet['text']))
+    title_words = 0
+    for pid in tweet['pids']:
+        if pid not in papers:
+            continue
+        title_words += len(tprepro(papers[pid]['title']))
+    comment_words = tweet_words - title_words # how much does the tweet have other than just the actual title of the article?
+
+    if comment_words < 3: 
+        weight -= 1
+
+    return weight
+
+@cache
 def tweets_rank(days=7):
     try:
         days = int(days)
@@ -195,43 +233,23 @@ def tweets_rank(days=7):
     tnow = time.time()
     t0 = tnow - int(days)*24*60*60
     tweets_filter = [t for p,t in tweets.items() if t['created_at_time'] > t0]
-    raw_votes, votes, records_dict, pid_to_words_cache = {}, {}, {}, {}
+    raw_votes, votes, records_dict = {}, {}, {}
     for tweet in tweets_filter:
-        # some tweets are really boring, like an RT
+        # filter out bots
         if "arxiv" in tweet['user_screen_name'].lower():
             continue
-        tweet_words = tprepro(tweet['text'])
-        isok = not(tweet['text'].startswith('RT') or 
-                tweet['lang'] != 'en' or 
-                len(tweet['text']) < 40)
-
-
-        # give people with more followers more vote, as it's seen by more people and contributes to more hype
-        float_vote = min(math.log10(tweet['user_followers_count'] + 1), 4.0)/2.0
-
-        # uprank tweets that have more likes, retweets, replies, and quotes
-        float_vote += math.log10(tweet['like_count'] + tweet['retweet_count'] + 1)
-        float_vote += math.log10(tweet['reply_count'] + tweet['quote_count'] + 1)
 
         for pid in set(tweet['pids']):
             if pid not in papers:
                 continue
             if not pid in records_dict: 
                 records_dict[pid] = {'pid':pid, 'tweets':[], 'vote': 0.0, 'raw_vote': 0} # create a new entry for this pid
-            
-            # good tweets make a comment, not just a boring RT, or exactly the post title. Detect these.
-            if pid in pid_to_words_cache:
-                title_words = pid_to_words_cache[pid]
-            else:
-                title_words = tprepro(papers[pid]['title'])
-                pid_to_words_cache[pid] = title_words
 
-            comment_words = tweet_words - title_words # how much does the tweet have other than just the actual title of the article?
-            isok2 = int(isok and len(comment_words) >= 3)
+            float_vote = score_tweet(tweet)
+            weight = float_vote + weight_tweet(tweet)
 
             # add up the votes for papers
-            tweet_sort_bonus = 10000 if isok2 else 0 # lets bring meaningful comments up front.
-            records_dict[pid]['tweets'].append({'screen_name':tweet['user_screen_name'], 'text':tweet['text'], 'weight':float_vote + tweet_sort_bonus, 'ok':isok2, 'id':str(tweet['id']) })
+            records_dict[pid]['tweets'].append({'screen_name':tweet['user_screen_name'], 'text':tweet['text'], 'weight':weight, 'id':tweet['id'] })
             votes[pid] = votes.get(pid, 0.0) + float_vote
             raw_votes[pid] = raw_votes.get(pid, 0) + 1
 
@@ -240,12 +258,7 @@ def tweets_rank(days=7):
         records_dict[pid]['vote'] = votes[pid] # record the total amount of vote across relevant tweets
         records_dict[pid]['raw_vote'] = raw_votes[pid] 
 
-    # crop the tweets to only some number of highest weight ones (for efficiency)
-    # for pid, d in records_dict.items():
-    #     d['num_tweets'] = len(d['tweets']) # back this up before we crop
-    #     d['tweets'].sort(reverse=True, key=lambda x: x['weight'])
-    #     if len(d['tweets']) > max_tweet_records: d['tweets'] = d['tweets'][:max_tweet_records]
-
+    
     pids = sorted(records_dict, key=lambda x: records_dict[x]['vote'], reverse=True) 
     scores = [records_dict[pid]['vote'] for pid in pids]
     tweets = [records_dict[pid]['tweets'] for pid in pids]
@@ -419,8 +432,13 @@ def inspect():
     tdb = get_tweets()
     tweets = [t for _, t in tdb.items() if pid in t['pids']]
     for i, t in enumerate(tweets):
-        tweets[i]['id'] = str(t['id'])
-
+        tweets[i]['votes'] = score_tweet(t)
+        tweets[i]['weight'] = weight_tweet(t)
+    
+    # crop the tweets to only some number of highest weight ones (for efficiency)
+    tweets.sort(reverse=True, key=lambda x: x['weight'])
+    if len(tweets) > max_tweet_records:
+        tweets = tweets[:max_tweet_records]  
 
     # package everything up and render
     paper = render_pid(pid)
@@ -592,3 +610,6 @@ def register_email():
                 edb[g.user] = email
 
     return redirect(url_for('profile'))
+
+if __name__ == '__main__':
+    app.run(debug=True)

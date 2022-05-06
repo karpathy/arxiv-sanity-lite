@@ -3,6 +3,7 @@
 up:
 	python arxiv_daemon.py --num 2000
 	python compute.py
+	python twitter_daemon.py
 
 # I use this to run the server
 fun:

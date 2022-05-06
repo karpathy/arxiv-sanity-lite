@@ -37,7 +37,7 @@ def get_latest_or_loop(q, start_datetime=None):
   results = []
   next_token = None
 
-  q = "url:arxiv.org lang:en -is:retweet"
+  q = "url:arxiv.org lang:en"
   bearer = open('twitter.txt', 'r').read().splitlines()[0]
   client = tweepy.Client(bearer)
   
@@ -68,12 +68,10 @@ def parse_tweets(results):
             arxiv_pids = extract_arxiv_pids(r)
             if not arxiv_pids: continue # nothing we know about here, lets move on
             author = next(a for a in authors if a.id == r.author_id)
-            if "arxiv" in r.user.screen_name.lower(): continue # banned user, very likely a bot
 
             # create the tweet. intentionally making it flat here without user nesting
-            #d = datetime.datetime.strptime(r.created_at,'iso8601')
             tweet = {}
-            tweet['id'] = r.id
+            tweet['id'] = str(r.id)
             tweet['pids'] = arxiv_pids # arxiv paper ids mentioned in this tweet
             tweet['inserted_at_date'] = datetime.datetime.utcnow().isoformat()
             tweet['created_at_date'] = r.created_at.isoformat()

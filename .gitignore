@@ -3,6 +3,7 @@
 __pycache__
 data
 *.ipynb
-secet_key.txt
+secret_key.txt
+launch.json
 env/
 twitter.txt
