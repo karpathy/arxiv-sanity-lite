@@ -5,6 +5,7 @@
 var papers = {{ papers | tojson }};
 var tags = {{ tags | tojson }};
 var words = {{ words | tojson }};
+var tweets = {{ tweets | tojson }};
 var words_desc = {{ words_desc | tojson }};
 var gvars = {{ gvars | tojson }};
 
@@ -43,6 +44,7 @@ var move_page = function(int_offset) {
                     <option value="tags" {{ gvars.rank == 'tags' and 'selected' }}>tags</option>
                     <option value="pid" {{ gvars.rank == 'pid' and 'selected' }}>pid</option>
                     <option value="time" {{ gvars.rank == 'time' and 'selected' }}>time</option>
+                    <option value="tweets" {{ gvars.rank == 'tweets' and 'selected' }}>tweets</option>
                     <option value="random" {{ gvars.rank == 'random' and 'selected' }}>random</option>
                 </select>
 
@@ -57,6 +59,10 @@ var move_page = function(int_offset) {
                 <!-- current time_filter, in a text field -->
                 <label for="time_filter">time_filter (days): </label>
                 <input name="time_filter" type="text" id="time_filter_field" value="{{ gvars.time_filter }}">
+
+                <!-- current tweets_filter, in a text field -->
+                <label for="tweets_filter">tweets_filter (tweets): </label>
+                <input name="tweets_filter" type="text" id="tweets_filter_field" value="{{ gvars.tweets_filter }}">
 
                 <!-- current svm_c, in a text field -->
                 <label for="svm_c">svm_c: </label>

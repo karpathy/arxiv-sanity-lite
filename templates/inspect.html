@@ -5,17 +5,38 @@
 var paper = {{ paper | tojson }};
 var words = {{ words | tojson }};
 var words_desc = {{ words_desc | tojson }};
+var tweets = {{ tweets | tojson }};
+var tweets_desc = {{ tweets_desc | tojson }};
 </script>
+
+<script>window.twttr = (function(d, s, id) {
+    var js, fjs = d.getElementsByTagName(s)[0],
+      t = window.twttr || {};
+    if (d.getElementById(id)) return t;
+    js = d.createElement(s);
+    js.id = id;
+    js.src = "https://platform.twitter.com/widgets.js";
+    fjs.parentNode.insertBefore(js, fjs);
+  
+    t._e = [];
+    t.ready = function(f) {
+      t._e.push(f);
+    };
+  
+    return t;
+  }(document, "script", "twitter-wjs"));</script>
 {% endblock %}
 
 {% block content %}
 <div id="wrap">
 </div>
-<div id="wordwrap">
+<div id="tweetwrap">
 </div>
+<div id="wordwrap">
 {% endblock %}
 
 {% block elements %}
 <script src="{{ url_for('static', filename='paper_detail.js') }}" type="text/babel"></script>
 <script src="{{ url_for('static', filename='word_list.js') }}" type="text/babel"></script>
+<script src="{{ url_for('static', filename='tweet_list.js') }}" type="text/babel"></script>
 {% endblock %}

@@ -11,6 +11,8 @@ import os
 import re
 import time
 from random import shuffle
+import math
+from functools import cache
 
 import numpy as np
 from sklearn import svm
@@ -20,13 +22,14 @@ from flask import render_template
 from flask import g # global session-level object
 from flask import session
 
-from aslite.db import get_papers_db, get_metas_db, get_tags_db, get_last_active_db, get_email_db
+from aslite.db import get_papers_db, get_metas_db, get_tags_db, get_last_active_db, get_email_db, get_tweets_db
 from aslite.db import load_features
 
 # -----------------------------------------------------------------------------
 # inits and globals
 
 RET_NUM = 25 # number of papers to return per page
+max_tweet_records = 15
 
 app = Flask(__name__)
 
@@ -61,6 +64,11 @@ def get_metas():
     if not hasattr(g, '_mdb'):
         g._mdb = get_metas_db()
     return g._mdb
+
+def get_tweets():
+    if not hasattr(g, '_tweets'):
+        g._tweets = get_tweets_db()
+    return g._tweets
 
 @app.before_request
 def before_request():
@@ -169,6 +177,95 @@ def svm_rank(tags: str = '', pid: str = '', C: float = 0.01):
 
     return pids, scores, words
 
+@cache
+def tprepro(tweet_text):
+  # take tweet, return set of words
+  t = tweet_text.lower()
+  t = re.sub(r'[^\w\s]','',t) # remove punctuation
+  ws = set([w for w in t.split() if not w.startswith('#')])
+  return ws
+
+
+def score_tweet(tweet):
+    # give people with more followers more vote, as it's seen by more people and contributes to more hype
+    float_vote = min(math.log10(tweet['user_followers_count'] + 1), 4.0)/2.0
+
+    # uprank tweets that have more likes, retweets, replies, and quotes
+    float_vote += math.log10(tweet['like_count'] + tweet['retweet_count'] + 1)
+    float_vote += math.log10(tweet['reply_count'] + tweet['quote_count'] + 1)
+    return float_vote
+
+def weight_tweet(tweet):
+    papers = get_papers()
+    weight = 10.0
+    # some tweets are really boring, like an rt
+    if "arxiv" in tweet['user_screen_name'].lower():
+        weight -= 1
+
+    if (tweet['text'].lower().startswith('rt') or 
+            tweet['lang'] != 'en' or 
+            len(tweet['text']) < 40):
+        weight -= 1
+    
+    # good tweets make a comment, not just a boring RT, or exactly the post title. Detect these.
+    tweet_words = len(tprepro(tweet['text']))
+    title_words = 0
+    for pid in tweet['pids']:
+        if pid not in papers:
+            continue
+        title_words += len(tprepro(papers[pid]['title']))
+    comment_words = tweet_words - title_words # how much does the tweet have other than just the actual title of the article?
+
+    if comment_words < 3: 
+        weight -= 1
+
+    return weight
+
+@cache
+def tweets_rank(days=7):
+    try:
+        days = int(days)
+    except:
+        days = 7
+
+    tweets = get_tweets()
+    papers = get_papers()
+    tnow = time.time()
+    t0 = tnow - int(days)*24*60*60
+    tweets_filter = [t for p,t in tweets.items() if t['created_at_time'] > t0]
+    raw_votes, votes, records_dict = {}, {}, {}
+    for tweet in tweets_filter:
+        # filter out bots
+        if "arxiv" in tweet['user_screen_name'].lower():
+            continue
+
+        for pid in set(tweet['pids']):
+            if pid not in papers:
+                continue
+            if not pid in records_dict: 
+                records_dict[pid] = {'pid':pid, 'tweets':[], 'vote': 0.0, 'raw_vote': 0} # create a new entry for this pid
+
+            float_vote = score_tweet(tweet)
+            weight = float_vote + weight_tweet(tweet)
+
+            # add up the votes for papers
+            records_dict[pid]['tweets'].append({'screen_name':tweet['user_screen_name'], 'text':tweet['text'], 'weight':weight, 'id':tweet['id'] })
+            votes[pid] = votes.get(pid, 0.0) + float_vote
+            raw_votes[pid] = raw_votes.get(pid, 0) + 1
+
+    # record the total amount of vote/raw_vote for each pid
+    for pid in votes:
+        records_dict[pid]['vote'] = votes[pid] # record the total amount of vote across relevant tweets
+        records_dict[pid]['raw_vote'] = raw_votes[pid] 
+
+    
+    pids = sorted(records_dict, key=lambda x: records_dict[x]['vote'], reverse=True) 
+    scores = [records_dict[pid]['vote'] for pid in pids]
+    tweets = [records_dict[pid]['tweets'] for pid in pids]
+
+    return pids, scores, tweets
+
+
 def search_rank(q: str = ''):
     if not q:
         return [], [] # no query? no results
@@ -210,13 +307,14 @@ def main():
     default_skip_have = 'no'
 
     # override variables with any provided options via the interface
-    opt_rank = request.args.get('rank', default_rank) # rank type. search|tags|pid|time|random
+    opt_rank = request.args.get('rank', default_rank) # rank type. search|tags|pid|time|tweets|random
     opt_q = request.args.get('q', '') # search request in the text box
     opt_tags = request.args.get('tags', default_tags)  # tags to rank by if opt_rank == 'tag'
     opt_pid = request.args.get('pid', '')  # pid to find nearest neighbors to
     opt_time_filter = request.args.get('time_filter', default_time_filter) # number of days to filter by
     opt_skip_have = request.args.get('skip_have', default_skip_have) # hide papers we already have?
     opt_svm_c = request.args.get('svm_c', '') # svm C parameter
+    opt_tweet_filter = request.args.get('tweet_filter', '') # days of tweets to filter
     opt_page_number = request.args.get('page_number', '1') # page number for pagination
 
     # if a query is given, override rank to be of type "search"
@@ -232,6 +330,7 @@ def main():
 
     # rank papers: by tags, by time, by random
     words = [] # only populated in the case of svm rank
+    tweets = [] # only populated in the case of tweet rank
     if opt_rank == 'search':
         pids, scores = search_rank(q=opt_q)
     elif opt_rank == 'tags':
@@ -240,6 +339,8 @@ def main():
         pids, scores, words = svm_rank(pid=opt_pid, C=C)
     elif opt_rank == 'time':
         pids, scores = time_rank()
+    elif opt_rank == 'tweets':
+        pids, scores, tweets = tweets_rank(days=opt_tweet_filter)
     elif opt_rank == 'random':
         pids, scores = random_rank()
     else:
@@ -287,12 +388,15 @@ def main():
     context['papers'] = papers
     context['tags'] = rtags
     context['words'] = words
+    context['tweets'] = tweets
     context['words_desc'] = "Here are the top 40 most positive and bottom 20 most negative weights of the SVM. If they don't look great then try tuning the regularization strength hyperparameter of the SVM, svm_c, above. Lower C is higher regularization."
+    context['words_desc'] = "Here are the top 15 most influential tweets about this paper."
     context['gvars'] = {}
     context['gvars']['rank'] = opt_rank
     context['gvars']['tags'] = opt_tags
     context['gvars']['pid'] = opt_pid
     context['gvars']['time_filter'] = opt_time_filter
+    context['gvars']['tweet_filter'] = opt_tweet_filter
     context['gvars']['skip_have'] = opt_skip_have
     context['gvars']['search_query'] = opt_q
     context['gvars']['svm_c'] = str(C)
@@ -324,12 +428,26 @@ def inspect():
         })
     words.sort(key=lambda w: w['weight'], reverse=True)
 
+    # get the tweets for this paper
+    tdb = get_tweets()
+    tweets = [t for _, t in tdb.items() if pid in t['pids']]
+    for i, t in enumerate(tweets):
+        tweets[i]['votes'] = score_tweet(t)
+        tweets[i]['weight'] = weight_tweet(t)
+    
+    # crop the tweets to only some number of highest weight ones (for efficiency)
+    tweets.sort(reverse=True, key=lambda x: x['weight'])
+    if len(tweets) > max_tweet_records:
+        tweets = tweets[:max_tweet_records]  
+
     # package everything up and render
     paper = render_pid(pid)
     context = default_context()
     context['paper'] = paper
     context['words'] = words
+    context['tweets'] = tweets
     context['words_desc'] = "The following are the tokens and their (tfidf) weight in the paper vector. This is the actual summary that feeds into the SVM to power recommendations, so hopefully it is good and representative!"
+    context['tweets_desc'] = "The following are the most influential tweets and their scores."
     return render_template('inspect.html', **context)
 
 @app.route('/profile')
@@ -492,3 +610,6 @@ def register_email():
                 edb[g.user] = email
 
     return redirect(url_for('profile'))
+
+if __name__ == '__main__':
+    app.run(debug=True)

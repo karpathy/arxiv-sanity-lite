@@ -129,6 +129,10 @@ def get_email_db(flag='r', autocommit=True):
     edb = SqliteDict(DICT_DB_FILE, tablename='email', flag=flag, autocommit=autocommit)
     return edb
 
+def get_tweets_db(flag='r', autocommit=True):
+    assert flag in ['r', 'c']
+    tdb = SqliteDict(DICT_DB_FILE, tablename='tweets', flag=flag, autocommit=autocommit)
+    return tdb
 # -----------------------------------------------------------------------------
 """
 our "feature store" is currently just a pickle file, may want to consider hdf5 in the future
