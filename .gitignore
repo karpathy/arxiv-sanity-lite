@@ -3,4 +3,6 @@
 __pycache__
 data
 *.ipynb
-secret_key.txt
+secet_key.txt
+env/
+twitter.txt

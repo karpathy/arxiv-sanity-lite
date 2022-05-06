@@ -3,3 +3,6 @@ Flask==2.0.2
 numpy==1.21.4
 scikit-learn==1.0.1
 sqlitedict==1.7.0
+tweepy
+
+
