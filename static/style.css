@@ -296,3 +296,7 @@ body {
     color: #009;
     text-decoration: underline;
 }
+
+.rel_img {
+  overflow-y: scroll;
+}
