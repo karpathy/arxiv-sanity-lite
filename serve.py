@@ -10,6 +10,7 @@ ideas:
 import os
 import re
 import time
+import math
 from random import shuffle
 
 import numpy as np
@@ -262,6 +263,7 @@ def main():
         pids, scores = [pids[i] for i in keep], [scores[i] for i in keep]
 
     # crop the number of results to RET_NUM, and paginate
+    total_pages = math.ceil(len(pids) / RET_NUM)
     try:
         page_number = max(1, int(opt_page_number))
     except ValueError:
@@ -297,6 +299,7 @@ def main():
     context['gvars']['search_query'] = opt_q
     context['gvars']['svm_c'] = str(C)
     context['gvars']['page_number'] = str(page_number)
+    context['gvars']['total_pages'] = str(total_pages)
     return render_template('index.html', **context)
 
 @app.route('/inspect', methods=['GET'])
