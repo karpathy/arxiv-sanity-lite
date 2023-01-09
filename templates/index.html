@@ -102,9 +102,13 @@ var move_page = function(int_offset) {
 
 <!-- links to previous and next pages -->
 <div id="pagination">
+    {% if gvars.page_number|int > 1 %}
     <span id="link-prev-page" onclick='move_page(-1);'>prev</span>
-    <span>current page: {{ gvars.page_number }} </span>
+    {% endif %}
+    <span>page {{ gvars.page_number }} of {{ gvars.total_pages }}</span>
+    {% if gvars.page_number|int < gvars.total_pages|int %}
     <span id="link-next-page" onclick='move_page(1);'>next</span>
+    {% endif %}
 </div>
 {% endblock %}
 
