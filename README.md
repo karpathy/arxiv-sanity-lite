@@ -48,6 +48,12 @@ All of the database will be stored inside the `data` directory. Finally, if you'
 - The metas table should not be a sqlitedict but a proper sqlite table, for efficiency
 - Build a reverse index to support faster search, right now we iterate through the entire database
 
+#### Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=karpathy/arxiv-sanity-lite&type=Date)](https://star-history.com/#karpathy/arxiv-sanity-lite&Date)
+
+
+
 #### License
 
 MIT
