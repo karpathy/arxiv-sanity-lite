@@ -118,8 +118,11 @@ body {
     color: white;
     text-decoration: none;
 }
-.rel more {
+.rel more { 
     font-size: 10px;
+}
+.rel_img { /* Prevent thumbnail from increasing width on mobile. */
+    overflow: hidden;
 }
 #sbox {
     width: 100%;
