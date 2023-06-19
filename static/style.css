@@ -121,6 +121,9 @@ body {
 .rel more {
     font-size: 10px;
 }
+.rel_img { /* Prevent thumbnail from increasing width (useful on mobile). */
+    overflow: hidden;
+}
 #sbox {
     width: 100%;
 }
